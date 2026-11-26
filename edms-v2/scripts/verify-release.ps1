@@ -1,4 +1,4 @@
-param([string]$Tag = 'edms-ups:2.1.3', [switch]$SkipBrowser)
+param([string]$Tag = 'edms-ups:2.1.11', [string]$VerifierTag = 'edms-ups-verifier:2.1.11', [switch]$SkipBrowser)
 $ErrorActionPreference = 'Stop'
 $appRoot = Split-Path $PSScriptRoot -Parent
 . (Join-Path $PSScriptRoot 'run-node-logged.ps1')
@@ -6,10 +6,11 @@ $runId = 'DUMMY-' + [Guid]::NewGuid().ToString('N').Substring(0, 12)
 $testNetwork = 'edms-testnet-' + $runId.ToLowerInvariant()
 $testDb = 'edms-testdb-' + $runId.ToLowerInvariant()
 $testApp = 'edms-testapp-' + $runId.ToLowerInvariant()
+$testOutput = Join-Path ([IO.Path]::GetTempPath()) ('edms-release-tests-' + $runId.ToLowerInvariant())
 $password = [Guid]::NewGuid().ToString('N') + [Guid]::NewGuid().ToString('N')
 $testSecret = [Guid]::NewGuid().ToString('N') + [Guid]::NewGuid().ToString('N')
 $envKeys = @('DB_HOST','DB_PORT','DB_NAME','DB_USER','DB_PASSWORD','JWT_SECRET',
-  'RUN_DUMMY_DB_TESTS','DUMMY_TEST_RUN','TEST_BASE_URL','STORAGE_ROOT','MARIADB_ROOT_PASSWORD')
+  'RUN_DUMMY_DB_TESTS','DUMMY_TEST_RUN','TEST_BASE_URL','DUMMY_FIXTURE_DIR','STORAGE_ROOT','MARIADB_ROOT_PASSWORD')
 $savedEnv = @{}
 foreach ($key in $envKeys) { $savedEnv[$key] = [Environment]::GetEnvironmentVariable($key, 'Process') }
 $report = [ordered]@{ testRun=$runId; image=$Tag; productionTouched=$false; startedAt=(Get-Date).ToString('o'); passed=$false }
@@ -49,6 +50,30 @@ function Stop-TestContainer([string]$Name) {
     Check-Exit ('Cleanup container dummy ' + $Name)
   }
 }
+function Quote-ProcessArgument([string]$Argument) {
+  if ($Argument -notmatch '[\s"]') { return $Argument }
+  $escaped = $Argument -replace '(\\*)"', '$1$1\"'
+  $escaped = $escaped -replace '(\\+)$', '$1$1'
+  return '"' + $escaped + '"'
+}
+function Invoke-LoggedDocker([string]$Step,[string]$LogName,[string[]]$DockerArguments) {
+  $stdoutPath = Join-Path $reportDir ($LogName + '-stdout.log')
+  $stderrPath = Join-Path $reportDir ($LogName + '-stderr.log')
+  $argumentLine = (($DockerArguments | ForEach-Object { Quote-ProcessArgument $_ }) -join ' ')
+  $process = Start-Process -FilePath $dockerExe -ArgumentList $argumentLine -WindowStyle Hidden -Wait -PassThru `
+    -RedirectStandardOutput $stdoutPath -RedirectStandardError $stderrPath
+  if (Test-Path -LiteralPath $stdoutPath) { Get-Content -LiteralPath $stdoutPath }
+  if (Test-Path -LiteralPath $stderrPath) { Get-Content -LiteralPath $stderrPath }
+  if ($process.ExitCode -ne 0) { throw "$Step gagal (exit $($process.ExitCode)). Detail lengkap: $stderrPath" }
+}
+function Invoke-LinuxVerifier([string]$Step,[string]$LogName,[string[]]$NodeArguments,[string]$Network) {
+  $dockerArguments = @('run','--rm','--network',$Network,'--read-only','--user','1000',
+    '--tmpfs','/tmp:rw,uid=1000,gid=1000,mode=1777,size=768m','--shm-size=512m',
+    '--mount',"type=bind,source=$testOutput,target=/opt/edms/tests/output",'--workdir','/opt/edms',
+    '--env','HOME=/tmp','--env','PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium','--env',("TEST_BASE_URL=http://${testApp}:3000"),
+    '--entrypoint','node',$VerifierTag) + $NodeArguments
+  Invoke-LoggedDocker -Step $Step -LogName $LogName -DockerArguments $dockerArguments
+}
 
 Push-Location $appRoot
 try {
@@ -58,10 +83,16 @@ try {
   Check-Exit 'Pemeriksaan image'
   if ("$platform".Trim() -ne 'linux/amd64') { throw 'Image harus linux/amd64.' }
   $report.imageId = (& docker image inspect $Tag --format '{{.Id}}').Trim()
+  $verifierPlatform = (& docker image inspect $VerifierTag --format '{{.Os}}/{{.Architecture}}').Trim()
+  Check-Exit 'Pemeriksaan image verifier Linux'
+  if ($verifierPlatform -ne 'linux/amd64') { throw 'Image verifier harus linux/amd64.' }
+  $report.verifierImage = $VerifierTag
+  $report.verifierImageId = (& docker image inspect $VerifierTag --format '{{.Id}}').Trim()
+  New-Item -ItemType Directory -Path $testOutput -Force | Out-Null
+  $testOutput = (Resolve-Path -LiteralPath $testOutput).ProviderPath
 
   Write-Output '[1/6] Membuat fixture dummy dan menjalankan test inti'
-  Invoke-LoggedNode -Step 'Test inti' -NodeArguments @('--test','tests/core.test.mjs','tests/import-summary.test.mjs','tests/management.test.mjs','tests/resource.test.mjs','tests/permanent-delete.test.mjs','tests/masters.test.mjs','tests/master-select.test.mjs','tests/filename-identity.test.mjs','tests/import-classification.test.mjs','tests/import-folders.test.mjs','tests/document-map.test.mjs','tests/role-policy.test.mjs','tests/update-retention.test.mjs') `
-    -WorkingDirectory $appRoot -LogDirectory $reportDir -LogName 'core-tests'
+  Invoke-LinuxVerifier -Step 'Test inti Linux' -LogName 'core-tests' -Network 'none' -NodeArguments @('--test','tests/core.test.mjs','tests/import-summary.test.mjs','tests/management.test.mjs','tests/resource.test.mjs','tests/permanent-delete.test.mjs','tests/masters.test.mjs','tests/master-select.test.mjs','tests/filename-identity.test.mjs','tests/import-classification.test.mjs','tests/import-folders.test.mjs','tests/document-map.test.mjs','tests/role-policy.test.mjs','tests/update-retention.test.mjs')
   $report.coreTests = $true
 
   $dbPort = Free-Port
@@ -78,6 +109,7 @@ try {
   $env:DUMMY_TEST_RUN = $runId
   $env:RUN_DUMMY_DB_TESTS = 'true'
   $env:TEST_BASE_URL = $base
+  $env:DUMMY_FIXTURE_DIR = $testOutput
   $env:STORAGE_ROOT = Join-Path $reportDir 'unused-host-storage'
 
   Write-Output '[2/6] Menjalankan MariaDB test sementara pada laptop'
@@ -129,17 +161,14 @@ try {
   Invoke-LoggedNode -Step 'Integrasi database dan file dummy' -NodeArguments @('tests/integration.mjs') `
     -WorkingDirectory $appRoot -LogDirectory $reportDir -LogName 'integration'
   $report.integration = $true
+  $report.documentReviewTests = $true
 
   Write-Output '[5/6] Uji UI dengan API dummy'
   if (-not $SkipBrowser) {
-    Invoke-LoggedNode -Step 'Interaksi UI dan viewport' -NodeArguments @('tests/ui.mjs') `
-      -WorkingDirectory $appRoot -LogDirectory $reportDir -LogName 'ui'
-    Invoke-LoggedNode -Step 'Sidebar dan layout responsive' -NodeArguments @('tests/layout.mjs') `
-      -WorkingDirectory $appRoot -LogDirectory $reportDir -LogName 'layout'
-    Invoke-LoggedNode -Step 'Proteksi revisi, upload lintas menu dan pasangan dokumen' -NodeArguments @('tests/ux.mjs') `
-      -WorkingDirectory $appRoot -LogDirectory $reportDir -LogName 'ux'
-    Invoke-LoggedNode -Step 'Peta Dokumen DUMMY desktop dan mobile' -NodeArguments @('tests/document-map-ui.mjs') `
-      -WorkingDirectory $appRoot -LogDirectory $reportDir -LogName 'document-map-ui'
+    Invoke-LinuxVerifier -Step 'Interaksi UI dan viewport' -NodeArguments @('tests/ui.mjs') -Network $testNetwork -LogName 'ui'
+    Invoke-LinuxVerifier -Step 'Sidebar dan layout responsive' -NodeArguments @('tests/layout.mjs') -Network $testNetwork -LogName 'layout'
+    Invoke-LinuxVerifier -Step 'Proteksi revisi, upload lintas menu dan pasangan dokumen' -NodeArguments @('tests/ux.mjs') -Network $testNetwork -LogName 'ux'
+    Invoke-LinuxVerifier -Step 'Peta Dokumen DUMMY desktop dan mobile' -NodeArguments @('tests/document-map-ui.mjs') -Network $testNetwork -LogName 'document-map-ui'
     $report.browserUi = $true
   } else { $report.browserUi = 'skipped; verifikasi manual masih wajib' }
 
@@ -159,7 +188,16 @@ try {
   } catch {}
   foreach ($key in $envKeys) { [Environment]::SetEnvironmentVariable($key, $savedEnv[$key], 'Process') }
   $report.finishedAt = (Get-Date).ToString('o')
+  if ($report.passed) { $report.dummyFixturesCleaned = $true }
   $report | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $reportDir 'result.json') -Encoding utf8
+  if ($report.passed) {
+    $canonicalReportDir = Join-Path $appRoot 'release/verification-2.1.11'
+    New-Item -ItemType Directory -Path $canonicalReportDir -Force | Out-Null
+    Copy-Item -LiteralPath (Join-Path $reportDir 'result.json') -Destination (Join-Path $canonicalReportDir 'result.json') -Force
+  }
+  if ($report.passed -and (Test-Path -LiteralPath $testOutput -PathType Container) -and $testOutput.StartsWith([IO.Path]::GetTempPath(), [StringComparison]::OrdinalIgnoreCase) -and $testOutput -match [regex]::Escape($runId.ToLowerInvariant())) {
+    Remove-Item -LiteralPath $testOutput -Recurse -Force
+  }
   Pop-Location
 }
 if (-not $report.passed) { throw "Verifikasi belum lulus. Log: $reportDir" }

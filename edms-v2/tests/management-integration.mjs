@@ -2,9 +2,11 @@ import assert from 'node:assert/strict';
 import {randomUUID} from 'node:crypto';
 import JSZip from 'jszip';
 import fs from 'node:fs/promises';
+import path from 'node:path';
 import {query} from '../src/lib/db.mjs';
 import {readOnlyTestRole} from './integration-roles.mjs';
 export async function managementIntegration({request,post,upload,documentId,excelId,base,cookie,tag,createdUsers}){
+ const fixtureDir=process.env.DUMMY_FIXTURE_DIR||'tests/output';
  const target=d=>({id:d.id,expectedVersion:d.activeVersion,lockVersion:d.lockVersion});
  const detail=async id=>(await request('documents/'+id)).data;
  const action=async(action,d,extra={})=>post('document-actions',{action,documents:[target(d)],reason:'DUMMY management test',...extra});
@@ -20,7 +22,7 @@ export async function managementIntegration({request,post,upload,documentId,exce
  console.log('DUMMY_STEP: mixed-success bulk operation');
  d=await detail(documentId);const x=await detail(excelId);assert((await action('metadata',d,{category:tag+'-bulk'})).data.results[0].ok);r=await post('document-actions',{action:'archive',documents:[target(d),target(x)],reason:'DUMMY partial bulk'});assert.equal(r.data.results.filter(x=>x.ok).length,1);assert.equal(r.data.results.filter(x=>!x.ok).length,1);assert((await action('unarchive',await detail(excelId))).data.results[0].ok);
  console.log('DUMMY_STEP: streamed ZIP original-only download');
- d=await detail(documentId);r=await post('exports',{documents:[target(d)]});assert.equal(r.r.status,200,JSON.stringify(r.data));const exportId=r.data.id;let state;for(let n=0;n<45;n++){state=(await request('exports/'+exportId)).data;if(['done','failed'].includes(state.state))break;await new Promise(r=>setTimeout(r,1000));}assert.equal(state.state,'done',JSON.stringify(state));response=await fetch(base+'/api/v2/exports/'+exportId+'?download=1',{headers:{Cookie:cookie}});assert.equal(response.status,200);const zipped=await JSZip.loadAsync(await response.arrayBuffer());const entries=Object.values(zipped.files).filter(f=>!f.dir);assert.equal(entries.length,1);assert(Buffer.from(await entries[0].async('nodebuffer')).equals(await fs.readFile('tests/output/DUMMY-prosedur.pdf')));
+ d=await detail(documentId);r=await post('exports',{documents:[target(d)]});assert.equal(r.r.status,200,JSON.stringify(r.data));const exportId=r.data.id;let state;for(let n=0;n<45;n++){state=(await request('exports/'+exportId)).data;if(['done','failed'].includes(state.state))break;await new Promise(r=>setTimeout(r,1000));}assert.equal(state.state,'done',JSON.stringify(state));response=await fetch(base+'/api/v2/exports/'+exportId+'?download=1',{headers:{Cookie:cookie}});assert.equal(response.status,200);const zipped=await JSZip.loadAsync(await response.arrayBuffer());const entries=Object.values(zipped.files).filter(f=>!f.dir);assert.equal(entries.length,1);assert(Buffer.from(await entries[0].async('nodebuffer')).equals(await fs.readFile(path.join(fixtureDir,'DUMMY-prosedur.pdf'))));
  console.log('DUMMY_STEP: admin user creation/reset/disable and read-only authorization');
  const roles=(await request('users')).data.roles,viewer=readOnlyTestRole(roles),admin=roles.find(r=>r.name==='Super user'),editor=roles.find(r=>r.name==='Editor');
  const username='DUMMY-'+randomUUID(),pw=randomUUID();r=await post('users',{username,fullName:'DUMMY Viewer',password:pw,roleId:viewer.id,bidang:'DUMMY'});assert.equal(r.r.status,200,JSON.stringify(r.data));const uid=r.data.id;createdUsers.push(uid);

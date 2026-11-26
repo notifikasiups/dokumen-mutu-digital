@@ -4,9 +4,11 @@ ENV NEXT_TELEMETRY_DISABLED=1
 COPY package.json package-lock.json ./
 RUN npm ci --ignore-scripts
 COPY . .
+ARG APP_VERSION=2.1.11
+RUN node -e "const fs=require('fs'),v=process.env.APP_VERSION,p=JSON.parse(fs.readFileSync('package.json','utf8')),l=JSON.parse(fs.readFileSync('package-lock.json','utf8'));p.version=v;l.version=v;l.packages[''].version=v;fs.writeFileSync('package.json',JSON.stringify(p,null,2)+'\\n');fs.writeFileSync('package-lock.json',JSON.stringify(l,null,2)+'\\n')"
 RUN npm run build
 
-FROM node:22-bookworm-slim AS runtime
+FROM node:22-bookworm-slim AS runtime-base
 RUN apt-get update && apt-get install -y --no-install-recommends python3 python3-venv libreoffice-writer libreoffice-calc fonts-liberation fonts-dejavu-core ca-certificates && rm -rf /var/lib/apt/lists/*
 COPY scripts/pdf2docx-requirements.txt /tmp/pdf2docx-requirements.txt
 RUN python3 -m venv /opt/pdf2docx-venv && /opt/pdf2docx-venv/bin/pip install --no-cache-dir -r /tmp/pdf2docx-requirements.txt
@@ -22,6 +24,18 @@ COPY --from=builder /build/sql ./sql
 RUN mkdir -p /app/storage && chown -R node:node /app/storage /opt/edms
 USER node
 RUN node scripts/check-runtime.mjs
+
+FROM runtime-base AS verifier
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends chromium && rm -rf /var/lib/apt/lists/*
+COPY --from=builder /build/node_modules ./node_modules
+COPY --from=builder /build/tests ./tests
+COPY --from=builder /build/src ./src
+RUN mkdir -p /opt/edms/tests/output && chown -R node:node /opt/edms/tests
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium HOME=/tmp
+USER node
+
+FROM runtime-base AS runtime
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=8s --start-period=30s --retries=3 CMD node -e "fetch('http://127.0.0.1:3000/api/v2/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 CMD ["node","scripts/start.mjs"]
