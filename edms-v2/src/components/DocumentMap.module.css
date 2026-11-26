@@ -78,3 +78,17 @@
 @media(max-width:760px){.head{display:block}.head h1{font-size:26px}.reload{margin-top:14px}.tools{grid-template-columns:1fr}.tools>span{grid-column:auto}.search{max-width:none}.viewSwitch{width:100%}.viewSwitch button{flex:1}.date{white-space:normal}.editor{grid-template-columns:1fr}.unlinkedHead{display:block}.unlinkedHead .moreButton{margin-top:10px}}
 @media(max-width:520px){.node{padding:13px}.nodeTop{display:block}.nodeTop span:last-child{display:block;max-width:none;margin-top:4px;text-align:left}.branch{margin-left:10px;padding-left:14px}.branch>li:before{left:-15px;width:14px}.levelGuide{grid-template-columns:repeat(2,minmax(0,1fr))}.scroll table{min-width:1080px}}
 @media print{.node{break-inside:avoid}.graph section{break-inside:auto}}
+
+/* Clearer hierarchy and compact map controls. */
+.head{margin-bottom:24px}
+.head h1{font-size:31px}
+.tools{padding:12px;border:1px solid #dce6eb;border-radius:11px;background:#fff;box-shadow:0 2px 8px #17334406}
+.search{max-width:none;border-radius:9px;box-shadow:0 1px 2px #17334405}
+.search:focus-within{border-color:#1684a0;box-shadow:0 0 0 3px #007d9a18}
+.scroll{box-shadow:0 2px 8px #17334406}
+.scroll thead{position:sticky;top:0;z-index:3}
+.scroll thead th{background:#f2f7f9}
+.node{border-color:#d5e2e7;border-left:3px solid #f0c522;border-radius:11px;box-shadow:0 2px 8px #17334408}
+.graph{border-color:#dbe5ea;border-radius:14px;background:#fff;box-shadow:0 2px 10px #17334406}
+.branch{border-left-color:#8ab7c5}
+@media(max-width:760px){.tools{padding:10px;border-radius:10px}.head{margin-bottom:18px}.graph{padding:14px}}
