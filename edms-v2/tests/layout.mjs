@@ -8,7 +8,7 @@ try {
  const page = await browser.newPage();
  const errors=[];
  page.on('pageerror',e=>errors.push(e.message));
- const doc={id:'dummy-layout',code:'DUMMY-LAYOUT',title:'DUMMY Pemeriksaan tata letak',department:'TEST',kind:'SOP/Prosedur',category:'DUMMY',activeVersion:1,lockVersion:0,status:'Aktif',updatedAt:'2026-10-23 09:00:00',canEdit:false,versions:[{id:'dummy-version',number:1,revision:'0',summary:'DUMMY layout only',actorName:'DUMMY',createdAt:'2026-10-23 09:00:00',files:[]}]};
+ const doc={id:'dummy-layout',code:'DUMMY-LAYOUT',title:'DUMMY Pemeriksaan tata letak',department:'TEST',kind:'SOP/Prosedur',category:'DUMMY',activeVersion:1,lockVersion:0,status:'Aktif',reviewStatus:'current',reviewDue:false,canReview:false,updatedAt:'2026-10-23 09:00:00',canEdit:false,versions:[{id:'dummy-version',number:1,revision:'0',summary:'DUMMY layout only',actorName:'DUMMY',createdAt:'2026-10-23 09:00:00',files:[]}]};
  await page.setRequestInterception(true);
  page.on('request',async req=>{
   const url=new URL(req.url());
@@ -16,6 +16,7 @@ try {
   const p=url.pathname.slice(8);
   let data={};
   if(p==='me')data={user:{id:1,fullName:'DUMMY Pengguna Uji',role:'Super user',bidang:'TEST'},canUpload:true};
+  else if(p==='folders')data={folder:null,breadcrumb:[],folders:[],documents:Array.from({length:30},(_,i)=>({...doc,id:'dummy-'+i,formats:'pdf'}))};
   else if(p==='documents')data={documents:Array.from({length:30},(_,i)=>({...doc,id:'dummy-'+i})),total:30,pages:1};
   else if(p.startsWith('documents/'))data=doc;
   else if(p==='audit')data={events:Array.from({length:30},(_,i)=>({id:i,actorName:'DUMMY',action:'TEST_LAYOUT',createdAt:doc.updatedAt,context:{test:'DUMMY'}})),total:30};

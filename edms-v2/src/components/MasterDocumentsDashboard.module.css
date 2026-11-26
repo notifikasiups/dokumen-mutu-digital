@@ -2,3 +2,27 @@
 @media(max-width:900px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.header{display:block}.header h1{font-size:26px}.refresh{margin-top:14px}.cards{grid-template-columns:1fr;gap:12px}.card{min-height:205px;padding:19px}.cardFooter{flex-wrap:wrap}}
 .openLink{display:inline-flex;align-items:center;gap:6px}.openLink svg{flex:none}.card:focus-visible,.refresh:focus-visible,.error button:focus-visible{outline:3px solid #f0bb35;outline-offset:3px}
+
+/* Match the shared workspace surface while keeping category cards distinct. */
+.header{align-items:center;margin-bottom:24px}
+.header h1{font-size:31px}
+.cards{gap:14px}
+.card{position:relative;overflow:hidden;min-height:220px;padding:22px 22px 20px;border-color:#dbe5ea;border-radius:14px;box-shadow:0 2px 9px #17334407}
+.card:before{position:absolute;inset:0 auto 0 0;width:3px;background:#f2c400;content:''}
+.card:hover{border-color:#7ab5c6;box-shadow:0 10px 26px #17334412;transform:translateY(-2px)}
+.cardIcon{width:44px;height:44px;border-radius:12px;background:#e8f5f8;color:#007d9a}
+.cardTitle{font-size:18px;letter-spacing:-.01em}
+.cardDescription{font-size:12px;line-height:1.65}
+.cardFooter{padding-top:18px}
+.note{border-radius:0 9px 9px 0}
+@media(max-width:600px){.header{margin-bottom:18px}.card{min-height:190px}}
+.cardTop{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;margin-bottom:18px}
+.cardIcon{margin:0}
+.comingSoon{position:relative;z-index:1;display:inline-flex;align-items:center;min-height:25px;padding:4px 9px;border-radius:999px;background:#fff4cb;color:#705500;font-size:10px;font-weight:700;white-space:nowrap}
+.card:disabled{opacity:1;cursor:not-allowed;background:#f8fafb;color:#526875;box-shadow:none;transform:none}
+.card:disabled .cardIcon{background:#eef2f4;color:#738590}
+.card:disabled .cardTitle{color:#526875}
+.card:disabled .cardDescription{color:#657985}
+.watermark{position:absolute;z-index:0;top:48%;right:-18px;transform:rotate(-12deg);padding:6px 22px;border:1px solid #e8d37b;border-radius:5px;background:#fff9e6c9;color:#8b6e05;font-size:12px;font-weight:800;letter-spacing:.12em;pointer-events:none}
+.card:disabled .cardTop,.card:disabled .cardTitle,.card:disabled .cardDescription,.card:disabled .cardFooter{position:relative;z-index:1}
+@media(max-width:600px){.cardTop{margin-bottom:14px}.watermark{right:-12px;font-size:11px}}

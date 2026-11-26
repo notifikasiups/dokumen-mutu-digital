@@ -14,7 +14,7 @@ import {filenameIdentity} from './filename-identity.mjs';
 import {skipImportItem,resolveImportItem} from './import-actions.mjs';
 import {departmentsMatch} from './document-classification.mjs';
 import {listDocumentMap,updateDocumentMap,readRegisteredDocumentDate} from './document-map.mjs';
-import {markDocumentReviewed} from './document-review.mjs';
+import {markDocumentReviewed,resetDocumentReview} from './document-review.mjs';
 import {zohoWebhook,zohoForms} from './zoho.mjs';
 const MAX_CHUNK=4*1024*1024;
 async function body(req,max=32768){const reader=req.body?.getReader();if(!reader)return Buffer.alloc(0);let size=0;const chunks=[];while(true){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>max){await reader.cancel();fail('Payload terlalu besar',413);}chunks.push(value);}return Buffer.concat(chunks);}
@@ -27,7 +27,7 @@ export async function handle(req,segments){try{
  // Webhook Zoho datang dari server Zoho (tanpa Origin/sesi); dilindungi kunci per form.
  const hook=await zohoWebhook(req,segments,{body,response});if(hook)return hook;
  if(method!=='GET'&&method!=='HEAD')origin(req);
- if(area==='health'&&method==='GET'){try{await query('SELECT 1');await ensure();return response({ok:true,version:'2.1.10',database:true});}catch{return response({ok:false,error:'Database atau storage belum siap'},503);}}
+ if(area==='health'&&method==='GET'){try{await query('SELECT 1');await ensure();return response({ok:true,version:'2.1.11',database:true});}catch{return response({ok:false,error:'Database atau storage belum siap'},503);}}
  if(area==='login'&&method==='POST'){
   await rate(req,'login',20);const data=await json(req),username=text(data.username,60);const [u]=await query('SELECT u.id,u.username,u.full_name fullName,u.password_hash,u.bidang,r.name role FROM users u JOIN roles r ON r.id=u.role_id WHERE u.username=? AND u.is_active=1',[username]);
   if(!u||typeof data.password!=='string'||data.password.length>200||!await bcrypt.compare(data.password,u.password_hash))fail('Username atau password salah',401);
@@ -47,6 +47,7 @@ export async function handle(req,segments){try{
  if(area==='stats'&&method==='GET'){const [stats]=await query("SELECT COUNT(*) documents,COALESCE(SUM(active_version-1),0) revisions,COUNT(DISTINCT department) departments,COALESCE(SUM(CASE WHEN last_reviewed_at IS NULL OR last_reviewed_version IS NULL OR last_reviewed_version<>active_version OR DATE_ADD(last_reviewed_at,INTERVAL 1 YEAR)<=NOW(3) THEN 1 ELSE 0 END),0) reviewDue FROM v2_documents WHERE status='Aktif'");const [files]=await query('SELECT COUNT(*) files,COALESCE(SUM(size),0) bytes FROM v2_files');const recent=await query("SELECT id,code,title,department,active_version activeVersion,updated_at updatedAt FROM v2_documents WHERE status='Aktif' ORDER BY updated_at DESC LIMIT 5");return response({...stats,...files,recent});}
  if(area==='documents'){
   if(key&&operation==='review'&&method==='POST')return response(await markDocumentReviewed(key,await json(req),user,req));
+  if(key&&operation==='review-reset'&&method==='POST')return response(await resetDocumentReview(key,await json(req),user,req));
   if(!key&&method==='GET')return response(await listDocuments(url,user));
   if(key&&method==='GET')return response(await detail(uuid(key),user));
   if(key&&method==='PATCH'){const data=await json(req);if(!['Aktif','Diarsipkan'].includes(data.status))fail('Status tidak valid');return response(await mutateDocument({id:uuid(key),lockVersion:data.lockVersion,expectedVersion:data.expectedVersion},data.status==='Aktif'?'unarchive':'archive',data,user,req));}

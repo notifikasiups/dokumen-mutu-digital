@@ -9,7 +9,7 @@ let page;
 try{
  page=await browser.newPage();const base=process.env.TEST_BASE_URL||'http://localhost:3100';
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- const sample={id:'DUMMY-doc',code:'DUMMY-01',title:'DUMMY Dokumen pasangan',department:'TEST',kind:'SOP/Prosedur',category:'DUMMY',status:'Aktif',activeVersion:2,lockVersion:3,canEdit:true,updatedAt:'2026-10-23 10:00:00',versions:[{id:'DUMMY-version',number:2,revision:'R1',summary:'DUMMY revision',actorName:'DUMMY',createdAt:'2026-10-23 10:00:00',files:[{id:'DUMMY-pdf',extension:'pdf',origin:'original',name:'DUMMY.pdf',size:100}]}]};
+ const sample={id:'DUMMY-doc',code:'DUMMY-01',title:'DUMMY Dokumen pasangan',department:'TEST',kind:'SOP/Prosedur',category:'DUMMY',status:'Aktif',activeVersion:2,lockVersion:3,reviewStatus:'current',reviewDue:false,canReview:false,formats:'pdf',updatedAt:'2026-10-23 10:00:00',canEdit:true,versions:[{id:'DUMMY-version',number:2,revision:'R1',summary:'DUMMY revision',actorName:'DUMMY',createdAt:'2026-10-23 10:00:00',files:[{id:'DUMMY-pdf',extension:'pdf',origin:'original',name:'DUMMY.pdf',size:100}]}]};
  const job={id:'DUMMY-job',kind:'import',state:'partial',progress:100,items:[{id:'DUMMY-item',originalPath:'DUMMY-pasangan.docx',state:'needs_review',stage:'pairing'}]};
  let holdPart,partStarted,resolveBody,parts=0,deletes=0,completed=0,failDocuments=false,failStats=false;
  let started=new Promise(r=>partStarted=r);
@@ -20,7 +20,8 @@ try{
   if(p==='me')data={user:{id:1,username:'DUMMY',fullName:'DUMMY User',role:'Super user',bidang:'TEST'},canUpload:true};
   else if(p==='masters')data={values:[...['Manual Mutu','SOP/Prosedur','Instruksi Kerja','Formulir Mutu'].map((value,i)=>({id:'DUMMY-kind-'+i,type:'kind',value,label:value,isActive:1,lockVersion:0})),...['BMK','TEST','Umum'].map((value,i)=>({id:'DUMMY-dept-'+i,type:'department',value,label:value,isActive:1,lockVersion:0})),{id:'DUMMY-category',type:'category',value:'DUMMY Test',label:'DUMMY Test',isActive:1,lockVersion:0}],canManage:true};
  else if(p==='stats'){if(failStats){status=503;data={error:'DUMMY ringkasan gagal'};}else data={documents:1,revisions:1,departments:1,bytes:100,recent:[sample]};}
-  else if(p==='documents'){if(failDocuments){status=503;data={error:'DUMMY register gagal'};}else data={documents:url.searchParams.get('search')==='kosong'?[]:[sample],total:1,pages:1};}
+  else if(p==='folders'){if(url.searchParams.has('catalog'))data={folders:[]};else if(url.searchParams.has('trash'))data={folders:[]};else if(url.searchParams.has('search'))data={searchResults:url.searchParams.get('search')==='kosong'?[]:[sample]};else if(failDocuments){status=503;data={error:'DUMMY register gagal'};}else data={folder:null,breadcrumb:[],folders:[],documents:[sample]};}
+  else if(p==='documents'){if(failDocuments){status=503;data={error:'DUMMY register gagal'};}else data={documents:[sample],total:1,pages:1};}
   else if(p==='documents/'+sample.id)data=sample;
   else if(p==='jobs')data={jobs:[job]};
   else if(p.endsWith('/resolve')){resolveBody=JSON.parse(req.postData());data={ok:true};}
@@ -43,10 +44,10 @@ try{
  assert.equal(await page.$eval('textarea[name=summary]',e=>e.value),'DUMMY isian harus terjaga');
  page.once('dialog',d=>d.accept());await click('Daftar Dokumen');await visible('DUMMY Dokumen pasangan');
  console.log('UX_STEP: register error, retry and empty result');
- failDocuments=true;await page.click('button[aria-label="Muat ulang"]');
- await visible('DUMMY register gagal');assert(!await page.evaluate(()=>document.body.innerText.includes('Belum ada dokumen')));
- failDocuments=false;await click('Coba lagi');await visible('DUMMY Dokumen pasangan');
- await page.type('input[aria-label="Cari dokumen"]','kosong');await visible('Tidak ada hasil yang cocok');
+ failDocuments=true;await click('Muat ulang');
+ await visible('DUMMY register gagal');assert(!await page.evaluate(()=>document.body.innerText.includes('Folder ini masih kosong')));
+ failDocuments=false;await click('Muat ulang');await visible('DUMMY Dokumen pasangan');
+ await page.type('input[aria-label="Cari file dan folder"]','kosong');await click('Cari');await visible('Tidak ada dokumen yang sesuai.');
  console.log('UX_STEP: cross-view upload progress and cancellation');
  await click('Upload & Impor');await visible('Pilih file dokumen atau ZIP');
  await fs.mkdir('tests/output',{recursive:true});const fixture=path.resolve('tests/output/DUMMY-ux.pdf');const pdf=await PDFDocument.create();const font=await pdf.embedFont(StandardFonts.Helvetica);pdf.addPage().drawText('DUMMY SYNTHETIC UX ONLY',{font});await fs.writeFile(fixture,await pdf.save());
@@ -73,7 +74,7 @@ try{
  assert.equal(resolveBody.metadata.mode,'attach');
  assert.equal(resolveBody.metadata.documentId,sample.id);assert.equal(resolveBody.metadata.expectedVersion,2);assert.equal(resolveBody.metadata.expectedLockVersion,3);assert.equal(resolveBody.metadata.revision,'R1');
  console.log('UX_STEP: dashboard failure state');
- failStats=true;await click('Ringkasan');await visible('DUMMY ringkasan gagal');assert(!await page.evaluate(()=>document.body.innerText.includes('Register siap diisi')));
+ failStats=true;await click('Dashboard');await visible('DUMMY ringkasan gagal');assert(!await page.evaluate(()=>document.body.innerText.includes('Register siap diisi')));
  await page.screenshot({path:'tests/output/ux-error.png',fullPage:true});
  assert.deepEqual(errors,[]);console.log('UX_PASS: revision discard guards, failed/empty/retry states, cross-view upload cancellation, pairing with version checks; intercepted DUMMY APIs only');
 }catch(error){

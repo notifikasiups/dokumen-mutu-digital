@@ -17,6 +17,7 @@ function mapFolder(row,user){
 function mapDocument(row,user){
  const document={id:row.id,code:row.code,title:row.title,department:row.department,kind:row.kind,category:row.category,
   activeVersion:Number(row.active_version),lockVersion:Number(row.lock_version),status:row.status,updatedAt:row.updated_at,
+  documentDate:row.document_date||null,dateStatus:row.date_status||'missing',
   formats:row.formats||'',canEdit:editable(user,row),canReview:editable(user,row),lastReviewedAt:row.last_reviewed_at||null,
   lastReviewedByName:row.last_reviewed_by_name||null,reviewedVersion:row.last_reviewed_version==null?null:Number(row.last_reviewed_version),
   reviewDueAt:row.review_due_at||null,reviewStatus:row.review_status||'unreviewed',reviewDue:['unreviewed','version_changed','overdue'].includes(row.review_status)};

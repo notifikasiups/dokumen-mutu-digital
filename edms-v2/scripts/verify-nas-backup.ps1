@@ -1,4 +1,4 @@
-param([Parameter(Mandatory=$true)][string]$Backup,[switch]$RehearseEmptyRegister,[switch]$RehearseRoles,[switch]$RehearseUpdate,[string]$UpdatePackage,[string]$UpdateImage='edms-ups:2.1.3',[string]$RestoreImage='edms-ups:2.1.0',[string]$ReuseVerifiedRestoreReport,[string]$StorageSource)
+param([Parameter(Mandatory=$true)][string]$Backup,[switch]$RehearseEmptyRegister,[switch]$RehearseRoles,[switch]$RehearseUpdate,[switch]$RehearseDocumentReviewMigration,[string]$UpdatePackage,[string]$UpdateImage='edms-ups:2.1.3',[string]$RestoreImage='edms-ups:2.1.0',[string]$ReuseVerifiedRestoreReport,[string]$StorageSource)
 $ErrorActionPreference='Stop'
 $restoreImage=if($RehearseUpdate){$UpdateImage}else{$RestoreImage}
 . (Join-Path $PSScriptRoot 'restore-test-db.ps1')
@@ -166,6 +166,20 @@ try{
  }
  $report.storageBackupVerified=$true;$report.composeRestoreVerified=$true
  $report.restoreVerified=$true
+ if($RehearseDocumentReviewMigration){
+  if($RehearseEmptyRegister -or $RehearseRoles -or $RehearseUpdate){throw 'Annual review migration rehearsal must run alone on the restored backup copy.'}
+  Write-Output 'RESTORE_STEP: rehearse additive annual-review migration and old-image DB compatibility on isolated restored database'
+  & docker run --rm --name $helper --label "edms.restoreRun=$run" --network $network --user 0 --read-only `
+   --env REVIEW_MIGRATION_TEST=1 --env "DB_HOST=$db" --env 'DB_PORT=3306' --env 'DB_NAME=edms_ups' --env 'DB_USER=root' --env "DB_PASSWORD=$password" `
+   --entrypoint node $restoreImage scripts/document-review-migration-2.1.11.mjs
+  Check-Exit 'Annual review migration rehearsal'
+  $report.documentReviewMigrationRehearsed=$true
+  & docker run --rm --name $helper --label "edms.restoreRun=$run" --network $network --read-only `
+   --env "DB_HOST=$db" --env 'DB_PORT=3306' --env 'DB_NAME=edms_ups' --env 'DB_USER=root' --env "DB_PASSWORD=$password" `
+   --entrypoint node edms-ups:2.1.10 -e 'const mysql=require("mysql2/promise");(async()=>{const c=await mysql.createConnection({host:process.env.DB_HOST,port:Number(process.env.DB_PORT),user:process.env.DB_USER,password:process.env.DB_PASSWORD,database:process.env.DB_NAME});try{const [[row]]=await c.query("SELECT COUNT(*) total FROM v2_documents");console.log("ROLLBACK_IMAGE_DB_READ_PASS",row.total)}finally{await c.end()}})().catch(e=>{console.error(e.code||e.message);process.exit(1)})'
+  Check-Exit 'Old-image compatibility after additive migration'
+  $report.oldImageCompatibilityVerified=$true
+ }
  if($RehearseEmptyRegister){
   Write-Output 'RESTORE_STEP: rehearse empty v2 register on the isolated restored database'
   $rehearsal=Join-Path $PSScriptRoot 'rehearse-empty-register.mjs'

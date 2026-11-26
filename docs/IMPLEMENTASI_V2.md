@@ -1,5 +1,9 @@
 # Status implementasi EDMS v2
 
+## Status terbaru — NAS v2.1.11 lulus — 26 November 2026
+
+NAS menjalankan `edms-ups:2.1.11`; `edms-ups-app` running/healthy, `OOMKilled=false`, health `{ok:true,version:"2.1.11",database:true}`, dan preflight `productionReady=true` dengan 8 akun aktif. Migrasi 011 hanya menambah metadata review tahunan secara aditif; jumlah tetap 367 dokumen, 368 versi, 373 file, 1.227 audit, dan 8 akun. Tidak ada dokumen dummy, seed dokumen, purge, atau perubahan pada file asli. Detail bukti backup/restore dan update: [UPDATE_NAS_2_1_11.md](UPDATE_NAS_2_1_11.md).
+
 ## NAS v2.1.8 (Form) lulus — 3 November 2026
 
 NAS mencetak `NAS_APP_UPDATE_PASS` pada `/share/Container/edms-release/app-update-2.1.8/attempt-20261103T023423Z-856`. Health LAN dari laptop `{ok:true,version:"2.1.8",database:true}`; container running/healthy, OOMKilled=false; preflight productionReady=true, 7 akun aktif. Migrasi aditif 009 lulus (`FORMS_MIGRATION_PASS`, izin runtime hanya pada 3 tabel form); jumlah sebelum/sesudah tetap 367 dokumen dan 7 akun. Empat form asli dibuat sebagai draf. Backup `/share/Container/edms-backups/edms-update-20261103T015018Z-24967` diuji restore di laptop (`DUMMY-RESTORE-71761cf4e131`: 24 tabel/objek, hash seluruh file asli dan Compose cocok). Atas keputusan pengguna tidak ada smoke DUMMY di produksi; form diuji langsung oleh pengguna. Checkpoint ini tidak boleh dipakai ulang setelah produksi menerima penulisan baru.
