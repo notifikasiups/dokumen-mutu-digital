@@ -1,6 +1,6 @@
 # Panduan Agen — EDMS PLN UP Sertifikasi
 
-Keputusan aktif versi 2.1. Baca [plan.md](plan.md) dan [spesifikasi](Spesifikasi_EDMS_Dokumen_Mutu_UPS.md). Dokumen dalam docs/archive adalah historis, bukan instruksi aktif. Source implementasi ada di edms-v2. Deploy NAS internal lulus 23 Oktober 2026; baca [docs/IMPLEMENTASI_V2.md](docs/IMPLEMENTASI_V2.md) sebelum operasi produksi untuk bukti, checkpoint dan batas pemulihan. Update berikutnya memakai backup baru; manifest transisi awal merupakan operasi sekali pakai.
+Keputusan aktif versi 2.1 dengan revisi UI dan review tahunan 26 November 2026. Baca [plan.md](plan.md), [spesifikasi](Spesifikasi_EDMS_Dokumen_Mutu_UPS.md), dan [catatan revisi](docs/REVISI_UI_REVIEW_2026-11-26.md). Dokumen dalam docs/archive adalah historis, bukan instruksi aktif. Source implementasi ada di edms-v2. Deploy NAS internal lulus 23 Oktober 2026; baca [docs/IMPLEMENTASI_V2.md](docs/IMPLEMENTASI_V2.md) sebelum operasi produksi untuk bukti, checkpoint dan batas pemulihan. Revisi lokal terbaru belum diuji/dideploy dan membutuhkan backup baru serta rehearsal sebelum rilis; manifest transisi awal merupakan operasi sekali pakai.
 
 ## Lingkup dan data
 
@@ -12,7 +12,7 @@ Original immutable, SHA-256, nama/path asli dan snapshot versi lengkap. Satu dok
 
 ## Workflow rilis pertama
 
-Tidak ada approval bertingkat, review, tanda tangan baru atau menu approval. Pengguna yang berhak upload/update langsung menerbitkan versi aktif setelah validasi/penyimpanan berhasil. Versi aktif lama tetap tersedia selama proses; perpindahan active_version_id dan pengarsipan sebelumnya atomik. Kegagalan konversi tidak membatalkan sumber valid yang sudah tersimpan. expectedVersion/lock_version untuk konflik 409; ringkasan perubahan wajib. Histori versi baru tetap disimpan walaupun histori aplikasi lama tidak dimigrasikan.
+Tidak ada approval bertingkat, review berjenjang, tanda tangan baru atau menu approval. Review tahunan dicatat terpisah dari penerbitan: dokumen belum direview, versi aktif berubah, atau satu tahun sejak review terakhir akan berstatus perlu direview. Editor/Super user yang berwenang dapat menandai review untuk versi aktif; simpan waktu, pengguna dan versi yang direview serta audit dengan optimistic lock. Review tidak menahan penerbitan/update. Pengguna yang berhak upload/update langsung menerbitkan versi aktif setelah validasi/penyimpanan berhasil. Versi aktif lama tetap tersedia selama proses; perpindahan active_version_id dan pengarsipan sebelumnya atomik. Kegagalan konversi tidak membatalkan sumber valid yang sudah tersimpan. expectedVersion/lock_version untuk konflik 409; ringkasan perubahan wajib. Histori versi baru tetap disimpan walaupun histori aplikasi lama tidak dimigrasikan.
 
 ## Upload, konversi dan pengujian
 
@@ -26,7 +26,7 @@ Pengujian upload, impor, update, download dan konversi hanya dengan file dummy s
 
 ## UI dan teknologi
 
-Periksa dan gunakan skill UI/desain terpasang yang sesuai saat implementasi UI; jangan mengklaim sudah dipakai sebelum membaca/menerapkannya. Tema biru muda dan kuning PLN, latar netral/teks kontras, dua logo lokal Danantara dan PLN dari Folder Logo, proporsi asli. Responsive desktop/tablet, keyboard/focus/modal accessible, state loading/kosong/error jelas. SVG stroke 1.75/currentColor, bukan emoji.
+Periksa dan gunakan skill UI/desain terpasang yang sesuai saat implementasi UI; jangan mengklaim sudah dipakai sebelum membaca/menerapkannya. Tema biru muda dan kuning PLN, latar netral/teks kontras, dua logo lokal Danantara dan PLN dari Folder Logo, proporsi asli. Navigasi memuat Dashboard, dashboard Master Dokumen dengan pilihan Sertifikasi/Asesmen/Konsultasi Sistem Manajemen, Daftar Dokumen berpohon folder, dan Peta Dokumen; File Explorer tidak menjadi menu terpisah. Review tahunan tampil sebagai status/tombol pada daftar dokumen, tanpa alur approval. Responsive desktop/tablet, keyboard/focus/modal accessible, state loading/kosong/error jelas. SVG stroke 1.75/currentColor, bukan emoji.
 
 Next.js App Router, TypeScript, CSS Modules, MariaDB. Tidak menambah Tailwind/dependency berat tanpa kebutuhan. Database snake_case, API/frontend camelCase, mapping eksplisit. Gunakan pool dan withTransaction untuk mutasi lintas tabel (referensi helper lama edms-app/src/lib/db.ts). Filesystem perlu staging/atomic rename/kompensasi/recovery, bukan asumsi satu transaksi DB.
 

@@ -33,7 +33,7 @@ function graphOf(documents:MapDocument[]){
 }
 export function DocumentMap({admin,onOpen}:{admin:boolean;onOpen:(id:string)=>void}){
  const resource=useResource<{documents:MapDocument[]}>('document-map');
- const [search,setSearch]=useState(''),[mode,setMode]=useState<'table'|'graph'>('table'),[editing,setEditing]=useState<string|null>(null),[error,setError]=useState(''),[saving,setSaving]=useState(false);
+ const [search,setSearch]=useState(''),[mode,setMode]=useState<'table'|'graph'>('graph'),[editing,setEditing]=useState<string|null>(null),[error,setError]=useState(''),[saving,setSaving]=useState(false);
  const [expanded,setExpanded]=useState<Set<string>>(()=>new Set()),[childLimits,setChildLimits]=useState<Record<string,number>>({});
  const [showUnlinked,setShowUnlinked]=useState(false),[unlinkedLimit,setUnlinkedLimit]=useState(24);
  const documents=resource.data?.documents||[];

@@ -33,6 +33,10 @@ Mulai hanya dari Dokumen Final. Data dokumen aplikasi lama beserta histori/secti
 | FR-16 | Backup/restore, job restart, health check dan rollback teruji |
 | FR-17 | UI biru muda/kuning PLN dengan Logo Danantara dan PLN lokal, responsive/accessible |
 | FR-18 | Seluruh pengujian upload memakai dummy sintetis, bukan dokumen final asli |
+| FR-19 | Ringkasan menjadi Dashboard; Master Dokumen memiliki dashboard khusus dengan kategori Sertifikasi, Asesmen, dan Konsultasi Sistem Manajemen |
+| FR-20 | Daftar Dokumen menelusuri dokumen menurut kategori dan pohon folder; menu File Explorer terpisah dihapus |
+| FR-21 | Catat review tahunan per dokumen dan versi aktif, tampilkan status/notifikasi pada daftar dan munculkan lagi saat versi berubah atau satu tahun terlewati |
+| FR-22 | Peta Dokumen menampilkan hierarki dengan tata letak pohon responsif dan terstruktur |
 
 Popup: "Dokumen ini merupakan hasil konversi PDF. Tata letak, tabel, dan isi mungkin berbeda dari dokumen asli. Periksa kembali sebelum digunakan." Batal tidak mengunduh; Word original tidak menampilkan peringatan keliru. Download converted Word memerlukan acknowledgement pengguna/file/version dan RBAC, tanpa URL publik yang melewati alur.
 
@@ -40,13 +44,13 @@ PDF asli tetap utuh; PDF resmi dan turunan dibedakan. Engine PDF-ke-DOCX dipilih
 
 ## 3. Hak akses dan status
 
-Viewer membaca/download sesuai izin. Penyusun/Editor upload/update lingkupnya. Admin mengelola akun/master/impor/arsip. Role lama dapat dipertahankan tanpa mengaktifkan tahap review/approval. Tidak ada tombol submit/approve/reject atau tanda tangan baru pada rilis ini.
+Viewer membaca/download sesuai izin. Penyusun/Editor upload/update lingkupnya. Admin mengelola akun/master/impor/arsip. Tidak ada review berjenjang, tombol submit/approve/reject atau tanda tangan baru pada rilis ini. Review tahunan adalah catatan bahwa pengguna berwenang telah meninjau versi aktif; review tidak menyetujui atau menahan publikasi dokumen.
 
-Status dokumen: Aktif atau Diarsipkan. Status teknis Terunggah/Diproses/Perlu Pemeriksaan/Gagal terpisah dari versi aktif. Versi baru aktif sesudah validasi dan commit sukses; versi lama tersedia sampai itu terjadi. Pairing ambigu perlu koreksi metadata, bukan pengesahan bertingkat.
+Status dokumen: Aktif atau Diarsipkan. Status teknis Terunggah/Diproses/Perlu Pemeriksaan/Gagal terpisah dari versi aktif. Status review juga terpisah dari status publikasi: belum direview, versi aktif berubah, atau satu tahun berlalu akan menampilkan Perlu direview. Review berikutnya dihitung satu tahun kalender dari `last_reviewed_at`; pergantian versi membuat versi baru perlu direview tanpa menghapus catatan sebelumnya. Versi baru aktif sesudah validasi dan commit sukses; versi lama tersedia sampai itu terjadi. Pairing ambigu perlu koreksi metadata, bukan pengesahan bertingkat.
 
 ## 4. Data dan keamanan
 
-Tabel: akun/roles/bidang yang dipertahankan; documents, document_versions, document_files, categories/document_relations, audit_logs, upload_sessions/upload_parts, import_jobs/import_items, conversion_jobs dan migration_runs. Tidak memerlukan approval baru. Nomor revisi resmi terpisah dari versi internal.
+Tabel: akun/roles/bidang yang dipertahankan; dokumen/versi/file, folder, audit, upload/import/conversion jobs dan migration runs. `v2_documents` menyimpan `last_reviewed_at`, `last_reviewed_by`, dan `last_reviewed_version`; migrasi aditif `011_document_review.sql` menambah kolom serta relasi pengguna. Setiap penandaan review memeriksa `expectedVersion` dan `lock_version`, lalu mencatat aksi `REVIEW_DOCUMENT` pada audit. Nomor revisi resmi terpisah dari versi internal. Tidak memerlukan tabel atau alur approval.
 
 Pool MariaDB dan transaksi untuk mutasi lintas tabel, optimistic locking (409), staging/atomic rename/kompensasi/recovery file. Endpoint file privat memeriksa izin, source editable dan arsip; HttpOnly/origin-CSRF/rate limit/validasi. Secret environment dan akun DB terbatas; tidak ada cache publik file privat.
 
@@ -56,6 +60,8 @@ Container/service lama, database edms_ups dan storage/mount NAS yang sama. NAS C
 
 Next.js/TypeScript/CSS Modules. Periksa dan gunakan skill UI terpasang yang relevan saat tahap UI. Palet biru muda dan kuning PLN dengan teks kontras, SVG ikon stroke 1.75/currentColor, logo Danantara dan PLN dari Folder Logo tanpa distorsi, layout desktop/tablet dan modal/focus/keyboard accessible.
 
+Navigasi menampilkan Dashboard dan Master Dokumen. Dashboard Master Dokumen menyediakan kategori Sertifikasi, Asesmen, dan Konsultasi Sistem Manajemen; tiap kategori membuka folder akar bernama sama. Daftar Dokumen merangkum penelusuran kategori/subfolder dan status review; File Explorer tidak menjadi menu terpisah. Peta Dokumen dimulai pada bagan hierarki yang responsif.
+
 ## 6. Transisi dan penerimaan
 
 Backup konsisten DB+file/restore teruji, maintenance, manifest cleanup data dokumen lama dan relasi/file miliknya, migrasi schema berversi/checkpoint, update runtime pada service yang sama, smoke dummy, cleanup dummy lalu buka akses. DDL MariaDB tidak otomatis rollback; jangan reset seluruh DB atau seed ulang akun. Audit transisi memuat hasil/jumlah. Source lama tetap dijaga sampai pengganti siap.
@@ -64,4 +70,4 @@ Inventaris awal Dokumen Final: 351 file (153 DOCX/195 PDF/3 XLSX), 194.708.120 b
 
 ## 7. Ditunda
 
-Approval bertingkat/tanda tangan baru, OCR lanjutan, editor browser, diff isi otomatis, full-text search, email, reminder, acknowledge dan template cloning. PDF-ke-DOCX bukan fitur yang ditunda.
+Approval bertingkat/tanda tangan baru, OCR lanjutan, editor browser, diff isi otomatis, full-text search, reminder review email/push, acknowledge dan template cloning. Indikator review tahunan dalam aplikasi dan pencatatan review pada daftar dokumen termasuk cakupan. PDF-ke-DOCX bukan fitur yang ditunda.
