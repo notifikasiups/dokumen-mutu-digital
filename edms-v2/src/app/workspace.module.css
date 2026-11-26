@@ -114,3 +114,7 @@
  .summaryStrip strong{font-size:23px}
  .recentRow .badge{font-size:9px}
 }
+.sidebar .navDisabled{color:#6f818b;background:#f8fafb;cursor:not-allowed}
+.sidebar .navDisabled:hover{color:#6f818b;background:#f8fafb}
+.sidebar .navDisabled .navSoon{margin-left:auto;padding:3px 6px;border-radius:999px;background:#fff4cb;color:#705500;font-size:9px;font-weight:700;white-space:nowrap}
+.sidebar .navChildren button{min-width:0}

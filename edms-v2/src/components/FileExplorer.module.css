@@ -106,3 +106,49 @@
  .search input{flex-basis:0}
  .search button{white-space:nowrap}
 }
+
+/* A register index keeps the folder hierarchy clear without imitating a file browser. */
+.folderIndex{margin:4px 0 24px;padding:20px;border:1px solid #dce6eb;border-radius:13px;background:linear-gradient(145deg,#f8fbfc,#fff 72%);}
+.folderIndexHead,.registerHead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:14px}
+.folderIndexHead h2,.registerHead h2{margin-top:5px;color:#173b4d;font-size:17px;letter-spacing:-.015em}
+.folderIndexHead p,.registerHead p{margin-top:5px;color:#607683;font-size:11px;line-height:1.5}
+.sectionKicker{color:#00728d;font-size:9px;font-weight:800;letter-spacing:.1em}
+.folderTotal,.documentTotal{flex:none;padding:6px 10px;border:1px solid #dce6eb;border-radius:999px;background:#fff;color:#496675;font-size:10px;font-weight:700}
+.folderList{display:grid;grid-template-columns:1fr;gap:8px;margin:0;padding:0;list-style:none}
+.folderItem{display:grid;grid-template-columns:38px minmax(0,1fr) auto;align-items:center;gap:12px;min-width:0;padding:12px 14px;border:1px solid #e0e9ed;border-radius:10px;background:#fff;transition:border-color .15s,background .15s}
+.folderItem:hover{border-color:#a9cbd6;background:#fcfefe}
+.folderNumber{display:grid;place-items:center;width:32px;height:32px;border-radius:9px;background:#e8f5f8;color:#006b84;font-size:10px;font-weight:800;font-variant-numeric:tabular-nums}
+.folderSummary{min-width:0}
+.folderLink{display:inline-flex;min-height:0;align-items:center;gap:8px;color:#173b4d;font-size:12px;font-weight:750;line-height:1.45}
+.folderLink:hover{color:#006e8a}
+.folderMeta{display:flex;flex-wrap:wrap;gap:5px 12px;margin-top:4px;color:#617784;font-size:10px;line-height:1.4}
+.folderMeta span:first-child{color:#375e6f;font-weight:650}
+.folderActions{display:flex;align-items:center;gap:7px}
+.openFolder{min-height:34px;padding:6px 9px;border:1px solid #cfe0e6;border-radius:7px;background:#f8fbfc;color:#00647c;font-size:10px;font-weight:700;white-space:nowrap;cursor:pointer}
+.openFolder:hover{border-color:#88b9c8;background:#edf7fa}
+.openFolder:focus-visible,.folderLink:focus-visible{outline:3px solid #f0bb35;outline-offset:2px}
+.registerHead{margin:2px 1px 12px}
+.documentsTable{min-width:1120px!important;table-layout:fixed}
+.documentsTable th:nth-child(1){width:145px}
+.documentsTable th:nth-child(2){width:300px}
+.documentsTable th:nth-child(3){width:150px}
+.documentsTable th:nth-child(4){width:68px}
+.documentsTable th:nth-child(5){width:260px}
+.documentsTable th:nth-child(6){width:135px}
+.documentsTable th:nth-child(7){width:100px}
+.documentsTable td{vertical-align:top}
+.documentCell .link{font-size:12px;line-height:1.5;font-weight:700}
+.documentCell small{margin-top:5px;line-height:1.45}
+.documentCell .documentPath{color:#8797a0;font-size:9px}
+.dateCell{white-space:normal;line-height:1.45}
+.versionCell{color:#31576b;font-size:11px;font-weight:700;font-variant-numeric:tabular-nums}
+.dateNote{margin:0;padding:0 13px 12px;color:#73848d;font-size:10px;line-height:1.5}
+@media(max-width:760px){
+ .folderIndex{padding:14px;border-radius:10px}
+ .folderIndexHead,.registerHead{align-items:flex-start}
+ .folderItem{grid-template-columns:32px minmax(0,1fr);gap:9px;padding:10px}
+ .folderActions{grid-column:2;justify-content:flex-start}
+ .folderMeta{gap:4px 9px}
+ .documentsTable{min-width:1120px!important}
+}
+@media(max-width:420px){.folderIndexHead,.registerHead{display:block}.folderTotal,.documentTotal{display:inline-flex;margin-top:8px}}

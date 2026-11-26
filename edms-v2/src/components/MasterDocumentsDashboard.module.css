@@ -16,3 +16,13 @@
 .cardFooter{padding-top:18px}
 .note{border-radius:0 9px 9px 0}
 @media(max-width:600px){.header{margin-bottom:18px}.card{min-height:190px}}
+.cardTop{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;margin-bottom:18px}
+.cardIcon{margin:0}
+.comingSoon{position:relative;z-index:1;display:inline-flex;align-items:center;min-height:25px;padding:4px 9px;border-radius:999px;background:#fff4cb;color:#705500;font-size:10px;font-weight:700;white-space:nowrap}
+.card:disabled{opacity:1;cursor:not-allowed;background:#f8fafb;color:#526875;box-shadow:none;transform:none}
+.card:disabled .cardIcon{background:#eef2f4;color:#738590}
+.card:disabled .cardTitle{color:#526875}
+.card:disabled .cardDescription{color:#657985}
+.watermark{position:absolute;z-index:0;top:48%;right:-18px;transform:rotate(-12deg);padding:6px 22px;border:1px solid #e8d37b;border-radius:5px;background:#fff9e6c9;color:#8b6e05;font-size:12px;font-weight:800;letter-spacing:.12em;pointer-events:none}
+.card:disabled .cardTop,.card:disabled .cardTitle,.card:disabled .cardDescription,.card:disabled .cardFooter{position:relative;z-index:1}
+@media(max-width:600px){.cardTop{margin-bottom:14px}.watermark{right:-12px;font-size:11px}}
