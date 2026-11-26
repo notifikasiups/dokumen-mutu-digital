@@ -1,5 +1,7 @@
 # Rencana Pembangunan Ulang EDMS PLN UP Sertifikasi
 
+Pembaruan source lokal 26 November 2026: revisi Dashboard, dashboard Master Dokumen/kategori, daftar dokumen berbasis folder, review tahunan, dan tata letak Peta Dokumen tercatat di [docs/REVISI_UI_REVIEW_2026-11-26.md](docs/REVISI_UI_REVIEW_2026-11-26.md). Source belum diuji/dibangun sebagai rilis, migrasi 011 belum dijalankan, dan NAS belum diubah.
+
 Status terbaru 30 Oktober 2026: update UI NAS v2.1.4 lulus dan health LAN terverifikasi; File Explorer memiliki tombol Kembali serta dialog folder yang tidak terpotong. Update mengganti image aplikasi saja, tanpa migrasi database atau backup data baru sesuai permintaan pengguna. Bukti di docs/UPDATE_NAS_UI_2_1_4.md. Status terdahulu di bawah adalah riwayat.
 
 Status terbaru 30 Oktober 2026: deployment NAS v2.1.3 lulus. Health LAN, smoke DUMMY, restart, publikasi dan retensi 2 dokumen/2 file/6 akun terverifikasi. Checkpoint `edms-update-20261029T235901Z-20829`, paket `nas-update-9b220b7a`; detail dan batas pemulihan di [docs/IMPLEMENTASI_V2.md](docs/IMPLEMENTASI_V2.md). Status sebelumnya di bawah adalah riwayat.
@@ -10,7 +12,7 @@ Status terbaru 29 Oktober 2026, v2.1.2: implementasi lokal File Explorer, pohon 
 Tanggal status: 23 Oktober 2026. Versi keputusan: 2.1. Status: deployment NAS v2.1.0 lulus, termasuk smoke dummy, restart, proteksi akun/master/audit dan register kosong. Akses internal http://10.10.200.166:3000; halaman dan health terverifikasi dari laptop. Bukti dan checkpoint: docs/IMPLEMENTASI_V2.md. Impor Dokumen Final belum dijalankan.
 Acuan spesifikasi: [Spesifikasi_EDMS_Dokumen_Mutu_UPS.md](Spesifikasi_EDMS_Dokumen_Mutu_UPS.md).
 
-Keputusan upload terbaru, 29 Oktober 2026, mengesampingkan aturan deduplikasi upload di bawah: upload baru tidak memeriksa/menolak/menggabungkan berdasarkan kesamaan isi, nama, judul atau kode. Setiap file menjadi dokumen terpisah dengan judul lengkap; update versi dan tambah format tetap melalui pilihan dokumen tujuan secara eksplisit. Rencana ZIP terbaru: folder teratas menjadi kategori dengan nama persis; subfolder dan folder kosong menjadi pohon folder yang dapat ditelusuri di File Explorer; file mempertahankan lokasi/path ZIP. Jika ZIP berisi beberapa folder tingkat teratas, setiap folder menjadi kategori; file langsung di root ZIP tampil di root Explorer. Nama ZIP tidak menambah folder pembungkus. Jalur folder identik dalam kategori yang sama dapat memakai node folder yang sama, tetapi setiap file upload tetap menjadi dokumen baru. Pengulangan finalize/retry job yang sama tetap idempoten berdasarkan identitas entri, bukan kesamaan isi. Hash SHA-256 tetap disimpan untuk integritas; menu pemeriksaan duplikat manual terpisah tetap tersedia. Upload tanpa deduplikasi sudah diterapkan pada NAS v2.1.1; struktur Explorer merupakan rencana lanjutan, belum diterapkan.
+Keputusan upload terbaru, 29 Oktober 2026, mengesampingkan aturan deduplikasi upload di bawah: upload baru tidak memeriksa/menolak/menggabungkan berdasarkan kesamaan isi, nama, judul atau kode. Setiap file menjadi dokumen terpisah dengan judul lengkap; update versi dan tambah format tetap melalui pilihan dokumen tujuan secara eksplisit. Folder teratas ZIP menjadi kategori dengan nama persis; subfolder dan folder kosong tetap membentuk pohon yang dapat ditelusuri dari Daftar Dokumen. Menu File Explorer terpisah dihapus pada revisi 26 November 2026, tetapi struktur folder dan API tetap digunakan. Jika ZIP berisi beberapa folder tingkat teratas, setiap folder menjadi kategori; file langsung di root ZIP tampil di root daftar. Nama ZIP tidak menambah folder pembungkus. Jalur folder identik dalam kategori yang sama dapat memakai node folder yang sama, tetapi setiap file upload tetap menjadi dokumen baru. Pengulangan finalize/retry job yang sama tetap idempoten berdasarkan identitas entri, bukan kesamaan isi. Hash SHA-256 tetap disimpan untuk integritas; menu pemeriksaan duplikat manual terpisah tetap tersedia. Upload tanpa deduplikasi dan struktur folder sudah diterapkan; revisi UI 26 November belum diuji/dideploy.
 
 ## 1. Keputusan final pengguna
 
@@ -57,7 +59,7 @@ Sampah/pulihkan, pilihan/aksi massal, ZIP original, metadata/filter lanjutan, Ad
 - DOCX/XLSX ke PDF dan PDF ke DOCX melalui antrean satu job konversi sekaligus.
 - Popup peringatan hasil konversi PDF-ke-Word, label asal dan status konversi.
 - Audit, arsip versi baru, backup/restore, health check dan rollback deployment.
-- Tidak ada antrean review, tanda tangan baru, approval bertingkat atau tombol submit/approve/reject pada rilis ini.
+- Tidak ada review berjenjang, tanda tangan baru, approval bertingkat atau tombol submit/approve/reject. Review tahunan hanya mencatat pemeriksaan versi aktif dan tidak menahan publikasi.
 
 ## 5. Upload ZIP dan kegagalan
 
@@ -105,6 +107,12 @@ Daftar -> Detail -> Download Word/Excel (PDF-only: Word hasil konversi + popup) 
 - Pisahkan nomor versi internal dan nomor revisi resmi. Ringkasan diisi pengguna; diff isi otomatis ditunda.
 - Pertahankan lembar pengesahan yang sudah ada dalam original. Aplikasi tidak menambah/memindahkan tanda tangan atau mengklaim pengesahan baru.
 
+### Review tahunan dokumen — revisi 26 November 2026
+
+Review tidak menjadi gate publikasi dan bukan approval. Daftar Dokumen menandai dokumen yang belum pernah direview, versi aktif yang berbeda dari versi review terakhir, atau review yang sudah mencapai satu tahun kalender. Editor/Super user yang berwenang pada bidang dokumen dapat memakai tombol **Sudah direview**; status, pengguna, waktu, versi aktif dan audit dicatat bersama pemeriksaan `expectedVersion`/`lock_version`. Status berikutnya jatuh tempo setelah satu tahun atau segera saat versi aktif berganti. Dashboard menunjukkan jumlah dokumen yang perlu direview.
+
+Migration 011 belum dijalankan pada database dan revisi source belum diuji atau dideploy.
+
 ## 8. Hak akses dan model data
 
 Viewer membaca/download aktif sesuai izin. Penyusun/Editor mengunggah serta memperbarui lingkup dokumennya. Admin mengelola akun, master, impor, arsip dan hak akses. Role lama tetap ada bila dipakai akun; keberadaan Tim Mutu/Manager/Pimpinan tidak memicu tahap approval. Izin sumber editable dan arsip dapat berbeda dari PDF.
@@ -117,7 +125,7 @@ Mutasi lintas tabel memakai pool MariaDB dan withTransaction; filesystem tidak i
 
 Gunakan skill UI/desain yang sudah terpasang dan sesuai pekerjaan source aplikasi; periksa katalog/instruksinya pada tahap UI, jangan mengklaim skill sudah digunakan hanya karena tercantum. Pertahankan CSS Modules dan hindari dependency berat tanpa kebutuhan.
 
-Tema biru muda dan kuning PLN dengan latar netral dan teks kontras. Kuning sebagai aksen; pastikan status tidak hanya dibedakan warna. Gunakan logo resmi lokal tanpa mengubah proporsi: Danantara SVG/PNG berwarna serta PLN PNG dari Folder Logo. Navigasi mencakup Dashboard, Daftar Dokumen, Upload/Impor, Histori dan pengaturan sesuai izin; tanpa menu approval. Desktop/tablet responsif, keyboard/focus/modal dapat diakses, state loading/kosong/sukses/error jelas. Ikon SVG stroke 1.75/currentColor, bukan emoji.
+Tema biru muda dan kuning PLN dengan latar netral dan teks kontras. Kuning sebagai aksen; pastikan status tidak hanya dibedakan warna. Gunakan logo resmi lokal tanpa mengubah proporsi: Danantara SVG/PNG berwarna serta PLN PNG dari Folder Logo. Navigasi mencakup Dashboard, dashboard Master Dokumen dengan kategori Sertifikasi/Asesmen/Konsultasi Sistem Manajemen, Daftar Dokumen berpohon folder, Peta Dokumen, Upload/Impor, Histori dan pengaturan sesuai izin; File Explorer bukan menu terpisah. Desktop/tablet responsif, keyboard/focus/modal dapat diakses, state loading/kosong/error jelas. Ikon SVG stroke 1.75/currentColor, bukan emoji.
 
 ## 10. Infrastruktur dan transisi
 
@@ -143,8 +151,9 @@ Cloudflare Tunnel tetap outbound, MariaDB 3307 internal. Upload chunk di bawah b
 | 5. Konversi | Office-PDF dan PDF-DOCX, modal | Batal/lanjut benar; hasil valid atau error/retry jelas |
 | 6. NAS | Build laptop, runtime sama, backup/rollback | Restart, resource, restore, smoke dummy lulus |
 | 7. Transisi | Pembersihan dokumen lama dan kesiapan impor | Akun/config aman; tidak ada dummy tersisa; impor asli bukan test |
-| 8. Explorer dan klasifikasi otomatis | Pohon folder, aksi folder, pemetaan kode dokumen/bidang dan master | Hierarki ZIP tepat; kode nama file mengisi jenis/bidang; RBAC serta data lama aman |
-| 9. Rilis lanjutan | Migrasi aditif, backup/restore dan paket Linux amd64 | Uji dummy, health, pemulihan dan smoke pada service NAS yang sama lulus |
+| 8. Pohon folder dan klasifikasi otomatis | Hierarki ZIP, aksi folder, pemetaan kode dokumen/bidang dan master | Hirarki dapat ditelusuri dari Daftar Dokumen; kode nama file mengisi jenis/bidang; RBAC serta data lama aman |
+| 9. Review tahunan | Migration 011, status per dokumen/versi, tombol terbatas RBAC dan audit | Status kembali jatuh tempo setelah satu tahun atau versi aktif berubah; konflik 409 dan audit terverifikasi |
+| 10. Rilis lanjutan | Migrasi aditif, backup/restore dan paket Linux amd64 | Uji dummy, health, pemulihan dan smoke pada service NAS yang sama lulus |
 
 Rencana bukan implementasi. Jangan menandai upload, migrasi atau pengujian selesai sebelum benar-benar dijalankan dan ada buktinya.
 
@@ -158,13 +167,13 @@ Rekonsiliasi seluruh 351 file asli hanya dilakukan pada impor operasional setela
 
 ## 13. Ditunda dan prasyarat tahap berikut
 
-Ditunda: approval bertingkat/tanda tangan baru, OCR lanjutan, editor browser, diff isi otomatis, pencarian full-text, email, reminder review, acknowledge dan template cloning.
+Ditunda: approval bertingkat/tanda tangan baru, OCR lanjutan, editor browser, diff isi otomatis, pencarian full-text, reminder review via email/push, acknowledge dan template cloning. Indikator tahunan di aplikasi termasuk cakupan revisi 26 November.
 
 Cek saat implementasi: skill UI tersedia, engine PDF-ke-DOCX dan kompatibilitas/lisensi/resource, runtime linux/amd64, mount/disk/font, batas upload, akses per bidang, penomoran revisi dan retensi backup. Tidak ada pertanyaan wajib tambahan untuk mulai fondasi.
 
 ## 14. Rencana lanjutan: File Explorer, struktur ZIP, dan klasifikasi otomatis
 
-Status 29 Oktober 2026: pengguna menyetujui arah fitur dan label. Bagian ini adalah rencana, bukan bukti implementasi. Perubahan source, migrasi, pengujian, atau deployment belum dilakukan.
+Status historis 29 Oktober 2026: pengguna menyetujui arah fitur dan label. Pada 26 November, penelusuran folder dipindahkan ke Daftar Dokumen dan menu File Explorer terpisah dihapus. Detail lama di bawah adalah riwayat keputusan struktur ZIP; status kode/perubahan baru dicatat terpisah dan belum diuji/deploy.
 
 ### Keputusan pengguna
 

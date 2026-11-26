@@ -26,10 +26,19 @@ Konfigurasi .env.local disalin dari edms-app; tidak masuk Git/image. Pastikan AP
 - npm ci (saat jaringan tersedia); dependency lokal yang tersedia dipakai dalam sesi implementasi ini.
 - npm run migrate: hanya membuat tabel v2_, tidak menghapus data lama.
 - npm run migrate -- --only 003: menerapkan master saja setelah schema 001/002 tersedia; jalankan pada database yang benar melalui prosedur backup/migrasi. Tidak dijalankan otomatis oleh startup aplikasi.
+- npm run migrate -- --only 011: menambah kolom review tahunan pada `v2_documents`; hanya jalankan setelah backup dan rehearsal database yang benar. Migrasi belum dijalankan.
 - npm run dev: web port 3100 dan worker background.
 - npm test: fixture dummy, ZIP dan PDF-ke-DOCX tanpa memerlukan database.
 - node tests/ui.mjs: browser integration dengan API mock; bukan bukti DB/upload sebenarnya.
 - node scripts/preflight.mjs: cek DB/storage/runtime tanpa mencetak secret.
+
+## Revisi UI dan review tahunan — 26 November 2026
+
+Dashboard menggantikan label Ringkasan. Master Dokumen membuka dashboard dengan kategori Sertifikasi, Asesmen, dan Konsultasi Sistem Manajemen; tiap pilihan menelusuri folder akar yang namanya sama persis. Daftar Dokumen menggunakan penelusuran kategori, folder, breadcrumb, pencarian, dan pengurusan folder yang sebelumnya berada pada menu File Explorer. Menu terpisah File Explorer sudah dihapus; API dan struktur folder tetap menjadi layanan Daftar Dokumen.
+
+Daftar menampilkan status review tahunan, tanggal/pengguna review terakhir, tanggal jatuh tempo, dan tombol **Sudah direview** bagi Editor/Super user yang berhak. Status kembali perlu direview saat versi aktif berubah atau satu tahun kalender sejak review terakhir tercapai. Penandaan menyimpan versi review dengan optimistic lock dan audit; tidak mengubah status publikasi.
+
+Peta Dokumen kini membuka bagan hubungan dengan tata letak pohon yang dirapikan. Perubahan ini source lokal, belum diuji, dimigrasikan, dibangun sebagai rilis atau dideploy. Database memerlukan migrasi aditif `011_document_review.sql`; jangan jalankan migrasi tersebut pada NAS sebelum backup baru, restore/rehearsal dan gate rilis di `docs/IMPLEMENTASI_V2.md` terpenuhi.
 
 ## Rilis Linux
 

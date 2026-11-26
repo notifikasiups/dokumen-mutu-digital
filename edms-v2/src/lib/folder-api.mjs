@@ -17,12 +17,16 @@ function mapFolder(row,user){
 function mapDocument(row,user){
  const document={id:row.id,code:row.code,title:row.title,department:row.department,kind:row.kind,category:row.category,
   activeVersion:Number(row.active_version),lockVersion:Number(row.lock_version),status:row.status,updatedAt:row.updated_at,
-  formats:row.formats||'',canEdit:editable(user,row)};
+  formats:row.formats||'',canEdit:editable(user,row),canReview:editable(user,row),lastReviewedAt:row.last_reviewed_at||null,
+  lastReviewedByName:row.last_reviewed_by_name||null,reviewedVersion:row.last_reviewed_version==null?null:Number(row.last_reviewed_version),
+  reviewDueAt:row.review_due_at||null,reviewStatus:row.review_status||'unreviewed',reviewDue:['unreviewed','version_changed','overdue'].includes(row.review_status)};
  return document;
 }
 const activeDocs=`SELECT d.*,
+ review_user.full_name last_reviewed_by_name,DATE_ADD(d.last_reviewed_at,INTERVAL 1 YEAR) review_due_at,
+ CASE WHEN d.last_reviewed_at IS NULL THEN 'unreviewed' WHEN d.last_reviewed_version IS NULL OR d.last_reviewed_version<>d.active_version THEN 'version_changed' WHEN DATE_ADD(d.last_reviewed_at,INTERVAL 1 YEAR)<=NOW(3) THEN 'overdue' ELSE 'current' END review_status,
  (SELECT GROUP_CONCAT(DISTINCT f.extension ORDER BY f.extension SEPARATOR ',') FROM v2_files f JOIN v2_versions v ON v.id=f.version_id WHERE v.document_id=d.id AND v.number=d.active_version AND f.origin='original') formats
- FROM v2_documents d`;
+ FROM v2_documents d LEFT JOIN users review_user ON review_user.id=d.last_reviewed_by`;
 
 async function folderById(folderId,c=null,{lock=false}={}){
  const sql='SELECT * FROM v2_folder_nodes WHERE id=?'+(lock?' FOR UPDATE':'');
