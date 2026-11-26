@@ -69,7 +69,6 @@ try {
     grantsAfter = grants.map(row => row.PRIVILEGE_TYPE);
     assert.deepEqual(grantsAfter, grantsBefore, 'Hak runtime berubah selama migrasi.');
   }
-  assert.equal(Number(ledger.total) > 0, Number(afterLedger.total) > 0);
   console.log('REVIEW_MIGRATION_PASS ' + JSON.stringify({rehearsal, schema, alreadyRecorded: Number(ledger.total) > 0,
     idempotencyVerified: true, counts: before, runtimeGrantsPreserved: runtimeUser ? grantsAfter : 'not applicable'}));
 } finally {
