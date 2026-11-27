@@ -152,3 +152,22 @@
  .documentsTable{min-width:1120px!important}
 }
 @media(max-width:420px){.folderIndexHead,.registerHead{display:block}.folderTotal,.documentTotal{display:inline-flex;margin-top:8px}}
+.documentsTable{min-width:1160px!important}
+.documentsTable th:nth-child(1){width:145px}
+.documentsTable th:nth-child(2){width:285px}
+.documentsTable th:nth-child(3){width:150px}
+.documentsTable th:nth-child(4){width:68px}
+.documentsTable th:nth-child(5){width:255px}
+.documentsTable th:nth-child(6){width:135px}
+.documentsTable th:nth-child(7){width:100px}
+.documentCell .link{display:inline-block;max-width:100%;white-space:normal}
+.documentCell .documentPath{color:#738690;font-size:9px}
+.dateFormActions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px}
+.dateNote{padding-top:2px}
+.attachmentGroup{margin:18px 0 24px;padding-inline-start:15px;border-inline-start:3px solid #e8c33b}
+.attachmentGroup .registerHead{align-items:center;margin:0 0 12px}
+.attachmentGroup .registerHead p{max-width:62ch}
+.attachmentGroup .tableWrap{margin-bottom:0}
+.attachmentGroup .dateNote{padding-bottom:10px}
+.dateFormActions :focus-visible{outline:3px solid #f0bb35;outline-offset:2px}
+@media(max-width:760px){.attachmentGroup{padding-inline-start:10px}.attachmentGroup .registerHead{align-items:flex-start;flex-wrap:wrap}.dateFormActions{justify-content:flex-start}}
