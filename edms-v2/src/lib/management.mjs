@@ -32,8 +32,21 @@ export async function mutateDocument(target,action,data,user,req){return withTra
   const kind=data.kind===undefined?doc.kind:text(data.kind,80);
   const category=data.category===undefined?doc.category:String(data.category).trim();if(category.length>500)fail('Kategori terlalu panjang');
   for(const [field,value] of Object.entries({kind,department,category}))if(value!==doc[field])await requireMaster(field,value,(sql,args)=>rows(c,sql,args));
-  patch={code:data.code===undefined?doc.code:text(data.code,160),title:data.title===undefined?doc.title:text(data.title,500),department,kind,category};
-  await rows(c,'UPDATE v2_documents SET code=?,title=?,department=?,kind=?,category=? WHERE id=?',[...Object.values(patch),doc.id]);
+  let documentDate=doc.documentDate,dateStatus=doc.dateStatus;
+  if(data.documentDate!==undefined){
+   admin(user);
+   if(data.documentDate===null||data.documentDate===''){documentDate=null;dateStatus='missing';}
+   else{
+    if(typeof data.documentDate!=='string'||!/^(19|20)\d{2}-\d{2}-\d{2}$/.test(data.documentDate))fail('Tanggal pengesahan harus berformat YYYY-MM-DD');
+    const parsed=new Date(data.documentDate+'T00:00:00.000Z');if(!Number.isFinite(parsed.getTime())||parsed.toISOString().slice(0,10)!==data.documentDate)fail('Tanggal pengesahan tidak valid');
+    documentDate=data.documentDate;dateStatus='verified';
+   }
+  }
+  patch={code:data.code===undefined?doc.code:text(data.code,160),title:data.title===undefined?doc.title:text(data.title,500),department,kind,category,documentDate,dateStatus};
+  const values=[patch.code,patch.title,patch.department,patch.kind,patch.category];
+  let update='UPDATE v2_documents SET code=?,title=?,department=?,kind=?,category=?';
+  if(data.documentDate!==undefined){update+=',document_date=?,date_status=?,date_source_file_id=NULL';values.push(documentDate,dateStatus);}
+  await rows(c,update+' WHERE id=?',[...values,doc.id]);
  }else if(['trash','archive','unarchive','untrash'].includes(action)){
   if(action==='untrash'&&doc.status!=='Sampah'||action!=='untrash'&&doc.status==='Sampah')fail('Status dokumen berubah',409);
   const status={trash:'Sampah',archive:'Diarsipkan',unarchive:'Aktif',untrash:raw.previous_status||'Aktif'}[action];

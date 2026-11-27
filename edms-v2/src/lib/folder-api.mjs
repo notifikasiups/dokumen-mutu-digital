@@ -56,6 +56,22 @@ async function listDocuments(folderId,user){
  sql+=' ORDER BY d.updated_at DESC,d.title LIMIT 500';
  return (await query(sql,args)).map(row=>mapDocument(row,user));
 }
+async function attachmentGroups(folderId,user){
+ const root=await folderById(folderId);
+ if(!root||root.is_deleted||!canViewFolder(user,root))fail('Lokasi dokumen tidak ditemukan',404);
+ const attachments=await query("SELECT * FROM v2_folder_nodes WHERE category=? AND is_deleted=0 AND LOWER(name)='lampiran' AND id<>? AND (?='' OR LEFT(relative_path,CHAR_LENGTH(?)+1)=CONCAT(?,'/')) ORDER BY relative_path,name",[root.category,root.id,root.relative_path,root.relative_path,root.relative_path]);
+ const groups=[];
+ for(const folder of attachments.filter(row=>canViewFolder(user,row))){
+  let sql=activeDocs.replace('SELECT d.*','SELECT d.*,n.category folder_category,n.relative_path folder_relative_path')+
+   " JOIN v2_document_folders df ON df.document_id=d.id JOIN v2_folder_nodes n ON n.id=df.folder_id WHERE d.status='Aktif' AND n.category=? AND n.is_deleted=0 AND (n.id=? OR LEFT(n.relative_path,CHAR_LENGTH(?)+1)=CONCAT(?,'/'))";
+  const args=[folder.category,folder.id,folder.relative_path,folder.relative_path];
+  if(user.role==='Editor'){const aliases=departmentAliases(user.bidang);sql+=' AND d.department IN ('+aliases.map(()=>'?').join(',')+')';args.push(...aliases);}
+  const records=await query(sql+' ORDER BY d.title,d.id LIMIT 500',args);
+  const mapped=records.map(row=>({...mapDocument(row,user),folderPath:folderPath({category:row.folder_category,relative_path:row.folder_relative_path})}));
+  groups.push({folder:{...mapFolder(folder,user),path:folderPath(folder)},documents:mapped});
+ }
+ return groups;
+}
 async function browse(folderId,user){
  if(!folderId){
   let folders=await query('SELECT * FROM v2_folder_nodes WHERE parent_id IS NULL AND is_deleted=0 ORDER BY name');
@@ -105,6 +121,7 @@ export async function manageFolders(req,segments,user,json,response){
  if(method==='GET'){
   if(url.searchParams.get('catalog')==='1')return response({folders:await catalog(user)});
   if(url.searchParams.get('trash')==='1')return response({folders:await deletedFolders(user)});
+  const attachmentsUnder=url.searchParams.get('attachmentsUnder');if(attachmentsUnder)return response({groups:await attachmentGroups(uuid(attachmentsUnder),user)});
   const search=url.searchParams.get('search')||'';
   if(search.trim())return response({searchResults:await searchDocuments(search,user)});
   return response(await browse(folderId?uuid(folderId):null,user));

@@ -1,6 +1,6 @@
 # Rencana Pembangunan Ulang EDMS PLN UP Sertifikasi
 
-Pembaruan source lokal 26 November 2026: revisi Dashboard, dashboard Master Dokumen/kategori, daftar dokumen berbasis folder, review tahunan, dan tata letak Peta Dokumen tercatat di [docs/REVISI_UI_REVIEW_2026-11-26.md](docs/REVISI_UI_REVIEW_2026-11-26.md). Source belum diuji/dibangun sebagai rilis, migrasi 011 belum dijalankan, dan NAS belum diubah.
+Pembaruan source lokal 27 November 2026: register Sertifikasi memprioritaskan Dokumen Wajib, mengganti label Kode menjadi Nomor Mutu, menampilkan Lampiran sebagai kelompok dokumen langsung di bawah register, dan menyediakan pengaturan tanggal pengesahan lewat Kelola oleh Super user. Detail UI, batas data, dan tanggal tersimpan ada di [docs/REVISI_UI_REVIEW_2026-11-26.md](docs/REVISI_UI_REVIEW_2026-11-26.md). Perubahan source ini belum dibangun sebagai rilis atau dideploy; migrasi 011 belum dijalankan, dan NAS belum diubah.
 
 Status terbaru 30 Oktober 2026: update UI NAS v2.1.4 lulus dan health LAN terverifikasi; File Explorer memiliki tombol Kembali serta dialog folder yang tidak terpotong. Update mengganti image aplikasi saja, tanpa migrasi database atau backup data baru sesuai permintaan pengguna. Bukti di docs/UPDATE_NAS_UI_2_1_4.md. Status terdahulu di bawah adalah riwayat.
 
