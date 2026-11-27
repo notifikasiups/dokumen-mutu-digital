@@ -1,5 +1,5 @@
 'use client';
-import {useMemo} from 'react';
+import {categoryRoots} from './register-category';
 import {IconBuilding,IconCheckCircle,IconDocuments,IconFolder,IconRefresh} from './Icons';
 import {useResource} from './useResource';
 import s from './MasterDocumentsDashboard.module.css';
@@ -14,13 +14,13 @@ const categories=[
 
 export function MasterDocumentsDashboard({onSelect}:{onSelect:(category:string)=>void}){
  const resource=useResource<FolderCatalog>('folders?catalog=1');
- const roots=useMemo(()=>new Set((resource.data?.folders||[]).filter(folder=>!folder.parentId).map(folder=>folder.name.toLocaleLowerCase('id'))),[resource.data]);
+ const roots=categoryRoots(resource.data?.folders||[],'Sertifikasi');
  return <div className={s.dashboard}>
   <header className={s.header}><div><span className={s.eyebrow}>Pusat dokumen</span><h1>Master Dokumen</h1><p>Pilih kelompok dokumen untuk menelusuri kategori dan folder yang sudah terdaftar.</p></div><button type="button" className={s.refresh} onClick={resource.reload} disabled={resource.loading}><IconRefresh/>Muat ulang</button></header>
   {resource.error&&<p className={s.error} role="alert">{resource.error} <button type="button" onClick={resource.reload}>Coba lagi</button></p>}
   <section className={s.cards} aria-label="Kelompok Master Dokumen">
    {categories.map(({name,description,Icon,comingSoon})=>{
-    const exists=!comingSoon&&roots.has(name.toLocaleLowerCase('id'));
+    const exists=!comingSoon&&!!(roots.explicit||roots.legacy.length);
     return <button type="button" key={name} className={s.card} disabled={comingSoon} onClick={()=>onSelect(name)}>
      {comingSoon&&<span className={s.watermark} aria-hidden="true">COMING SOON</span>}
      <span className={s.cardTop}><span className={s.cardIcon}><Icon size={22}/></span>{comingSoon&&<span className={s.comingSoon}>Segera hadir</span>}</span>
@@ -29,6 +29,6 @@ export function MasterDocumentsDashboard({onSelect}:{onSelect:(category:string)=
     </button>;
    })}
   </section>
-  {!resource.error&&<p className={s.note}>Isi setiap kelompok mengikuti folder dengan nama kategori yang sama pada Daftar Dokumen. File asli dan susunan subfolder tetap berada pada lokasi penyimpanannya.</p>}
+
  </div>;
 }

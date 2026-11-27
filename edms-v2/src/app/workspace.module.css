@@ -118,3 +118,10 @@
 .sidebar .navDisabled:hover{color:#6f818b;background:#f8fafb}
 .sidebar .navDisabled .navSoon{margin-left:auto;padding:3px 6px;border-radius:999px;background:#fff4cb;color:#705500;font-size:9px;font-weight:700;white-space:nowrap}
 .sidebar .navChildren button{min-width:0}
+@media(min-width:761px){
+ .topbar{height:54px}.main{padding-inline:clamp(18px,2vw,32px)}
+ .sidebar nav .navActive{background:#dff1f5;box-shadow:inset 3px 0 #00768c}
+ .summaryStrip{gap:0;border:1px solid var(--line);border-radius:12px;background:white;overflow:hidden}
+ .summaryStrip>div{border:0;border-radius:0;box-shadow:none}
+ .dashboardGrid{grid-template-columns:minmax(0,1fr)}
+}

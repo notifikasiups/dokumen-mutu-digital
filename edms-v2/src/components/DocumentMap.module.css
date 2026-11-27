@@ -14,7 +14,7 @@
 .viewSwitch button[aria-pressed=true]{background:#fff;color:#006681;box-shadow:0 1px 3px #1733441a}
 .viewSwitch button:hover{color:#00576e}
 .scroll{max-width:100%;overflow:auto;border:1px solid #d3dfe4;border-radius:10px;background:#fff}
-.scroll table{width:100%;min-width:1120px;border-collapse:collapse;font-size:12px}
+.scroll table{width:100%;min-width:720px;border-collapse:collapse;font-size:12px}
 .scroll thead{background:#eaf5f8}
 .scroll th,.scroll td{padding:12px;border-bottom:1px solid #e0e9ed;text-align:left;vertical-align:top}
 .scroll thead th{color:#315568;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}

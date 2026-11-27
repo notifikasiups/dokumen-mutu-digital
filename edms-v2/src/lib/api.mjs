@@ -1,3 +1,4 @@
+import {reviewStatusSql} from './review-schedule.mjs';
 import {NextResponse} from 'next/server';
 import bcrypt from 'bcryptjs';
 import fs from 'node:fs/promises';
@@ -14,7 +15,7 @@ import {filenameIdentity} from './filename-identity.mjs';
 import {skipImportItem,resolveImportItem} from './import-actions.mjs';
 import {departmentsMatch} from './document-classification.mjs';
 import {listDocumentMap,updateDocumentMap,readRegisteredDocumentDate} from './document-map.mjs';
-import {markDocumentReviewed,resetDocumentReview} from './document-review.mjs';
+import {markDocumentReviewed,resetDocumentReview,scheduleDocumentReview} from './document-review.mjs';
 import {zohoWebhook,zohoForms} from './zoho.mjs';
 const MAX_CHUNK=4*1024*1024;
 async function body(req,max=32768){const reader=req.body?.getReader();if(!reader)return Buffer.alloc(0);let size=0;const chunks=[];while(true){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>max){await reader.cancel();fail('Payload terlalu besar',413);}chunks.push(value);}return Buffer.concat(chunks);}
@@ -44,9 +45,10 @@ export async function handle(req,segments){try{
  const formResult=await zohoForms(req,segments,user,{body,response});if(formResult)return formResult;
  if(area==='me')return response({user,canUpload:editable(user)});
  if(area==='logout'&&method==='POST'){await audit(null,user,req,'LOGOUT');const r=response({ok:true});r.cookies.set(cookie(),'',{httpOnly:true,path:'/',maxAge:0});return r;}
- if(area==='stats'&&method==='GET'){const [stats]=await query("SELECT COUNT(*) documents,COALESCE(SUM(active_version-1),0) revisions,COUNT(DISTINCT department) departments,COALESCE(SUM(CASE WHEN last_reviewed_at IS NULL OR last_reviewed_version IS NULL OR last_reviewed_version<>active_version OR DATE_ADD(last_reviewed_at,INTERVAL 1 YEAR)<=NOW(3) THEN 1 ELSE 0 END),0) reviewDue FROM v2_documents WHERE status='Aktif'");const [files]=await query('SELECT COUNT(*) files,COALESCE(SUM(size),0) bytes FROM v2_files');const recent=await query("SELECT id,code,title,department,active_version activeVersion,updated_at updatedAt FROM v2_documents WHERE status='Aktif' ORDER BY updated_at DESC LIMIT 5");return response({...stats,...files,recent});}
+ if(area==='stats'&&method==='GET'){const [stats]=await query("SELECT COUNT(*) documents,COALESCE(SUM(active_version-1),0) revisions,COUNT(DISTINCT department) departments,COALESCE(SUM(CASE WHEN ("+reviewStatusSql+") <> 'current' THEN 1 ELSE 0 END),0) reviewDue FROM v2_documents d WHERE status='Aktif'");const [files]=await query('SELECT COUNT(*) files,COALESCE(SUM(size),0) bytes FROM v2_files');const recent=await query("SELECT id,code,title,department,active_version activeVersion,updated_at updatedAt FROM v2_documents WHERE status='Aktif' ORDER BY updated_at DESC LIMIT 5");return response({...stats,...files,recent});}
  if(area==='documents'){
   if(key&&operation==='review'&&method==='POST')return response(await markDocumentReviewed(key,await json(req),user,req));
+  if(key&&operation==='review-schedule'&&method==='PATCH')return response(await scheduleDocumentReview(key,await json(req),user,req));
   if(key&&operation==='review-reset'&&method==='POST')return response(await resetDocumentReview(key,await json(req),user,req));
   if(!key&&method==='GET')return response(await listDocuments(url,user));
   if(key&&method==='GET')return response(await detail(uuid(key),user));

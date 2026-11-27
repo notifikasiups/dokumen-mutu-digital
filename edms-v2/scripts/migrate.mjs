@@ -3,7 +3,7 @@ import {pool,query} from '../src/lib/db.mjs';
 import {migrateFolderData} from './folder-migration.mjs';
 import {explorerSqlForDatabase} from './explorer-schema.mjs';
 import {ensureDocumentReviewSchema} from './document-review-schema.mjs';
-const migrations=[['001','001_v2.sql'],['002','002_management.sql'],['003','003_masters.sql'],['005','005_upload_folders.sql'],['006','006_file_explorer.sql'],['007','007_document_map.sql'],['008','008_lampiran.sql'],['010','010_zoho_forms.sql'],['011','011_document_review.sql']];
+const migrations=[['001','001_v2.sql'],['002','002_management.sql'],['003','003_masters.sql'],['005','005_upload_folders.sql'],['006','006_file_explorer.sql'],['007','007_document_map.sql'],['008','008_lampiran.sql'],['010','010_zoho_forms.sql'],['011','011_document_review.sql'],['012','012_review_schedule.sql']];
 const args=process.argv.slice(2);
 if(args.length&&!(args.length===2&&args[0]==='--only'&&migrations.some(([v])=>v===args[1])))throw new Error('Gunakan npm run migrate atau npm run migrate -- --only <versi>');
 const selected=args.length?migrations.filter(([v])=>v===args[1]):migrations;
