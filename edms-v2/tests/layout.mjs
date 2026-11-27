@@ -44,12 +44,13 @@ try {
   assert(!layout.overflow,`Viewport overflow ${width}`);
   if(width===1024)assert(layout.navScrollable,'Short desktop menu must scroll independently');
   // Locator.filter checks the first matched node; it does not search all buttons.
+  if(width<=760)await page.click('[aria-controls=workspace-navigation]');
   await page.locator('nav ::-p-aria([name="Histori Aktivitas"][role="button"])').click();
   await page.waitForSelector('tbody tr details');
   assert.equal(await page.$eval('nav button[aria-current="page"]',b=>b.textContent.trim()),'Histori Aktivitas','Audit navigation did not activate');
   assert(await page.$eval('tbody td:nth-child(4)',e=>getComputedStyle(e).display!=='none'),'Audit details hidden');
   await page.screenshot({path:`tests/output/layout-${width}.png`});
-  await page.goto((process.env.TEST_BASE_URL||'http://localhost:3100')+'/?view=detail&doc=dummy-layout',{waitUntil:'networkidle0'});
+  await page.goto((process.env.TEST_BASE_URL||'http://localhost:3100')+'/?view=detail&doc=dummy-layout&category=Sertifikasi',{waitUntil:'networkidle0'});
   await page.waitForSelector('dl');
   assert(await page.$eval('dl',e=>!!e.getClientRects().length),'Document identity hidden');
   assert(await page.$('nav button[aria-current="page"]'),'Detail active navigation missing');

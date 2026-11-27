@@ -16,7 +16,7 @@ export function MasterDocumentsDashboard({onSelect}:{onSelect:(category:string)=
  const resource=useResource<FolderCatalog>('folders?catalog=1');
  const roots=categoryRoots(resource.data?.folders||[],'Sertifikasi');
  return <div className={s.dashboard}>
-  <header className={s.header}><div><span className={s.eyebrow}>Pusat dokumen</span><h1>Master Dokumen</h1><p>Pilih kelompok dokumen untuk menelusuri kategori dan folder yang sudah terdaftar.</p></div><button type="button" className={s.refresh} onClick={resource.reload} disabled={resource.loading}><IconRefresh/>Muat ulang</button></header>
+  <header className={s.header}><div><h1>Master Dokumen</h1><p>Pilih layanan untuk membuka register dokumen.</p></div><button type="button" className={s.refresh} onClick={resource.reload} disabled={resource.loading}><IconRefresh/>Muat ulang</button></header>
   {resource.error&&<p className={s.error} role="alert">{resource.error} <button type="button" onClick={resource.reload}>Coba lagi</button></p>}
   <section className={s.cards} aria-label="Kelompok Master Dokumen">
    {categories.map(({name,description,Icon,comingSoon})=>{

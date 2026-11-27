@@ -9,3 +9,5 @@
 @media(max-width:760px){.tableWrap{contain:inline-size}.bulk>span{flex-basis:100%}.confirm{padding:16px}.filters{gap:12px}}
 .bulk select{flex:1 1 200px;width:auto;max-width:310px}.method{display:grid;gap:7px;max-width:420px;font-size:12px;font-weight:600}.confirm input{width:100%}
 .method{margin-bottom:20px}
+.filters{background:#f5f8fa;padding:14px;border:1px solid var(--line);border-radius:8px;align-items:end;gap:12px}
+.filters input,.filters select{min-height:42px}

@@ -26,3 +26,8 @@
 .watermark{position:absolute;z-index:0;top:48%;right:-18px;transform:rotate(-12deg);padding:6px 22px;border:1px solid #e8d37b;border-radius:5px;background:#fff9e6c9;color:#8b6e05;font-size:12px;font-weight:800;letter-spacing:.12em;pointer-events:none}
 .card:disabled .cardTop,.card:disabled .cardTitle,.card:disabled .cardDescription,.card:disabled .cardFooter{position:relative;z-index:1}
 @media(max-width:600px){.cardTop{margin-bottom:14px}.watermark{right:-12px;font-size:11px}}
+.card{min-height:190px;box-shadow:none;border-radius:10px}
+.card:not(:disabled){border-top:3px solid #00758e}.card:before{display:none}
+.cardFooter{border-top:1px solid var(--line);margin-top:18px;padding-top:12px}
+.watermark{top:8px;right:10px;transform:none;border:0;background:transparent;color:#6b7880;font-size:9px;letter-spacing:.06em}
+.card:disabled .comingSoon{visibility:hidden}

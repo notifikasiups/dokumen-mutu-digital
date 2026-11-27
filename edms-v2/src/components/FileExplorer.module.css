@@ -87,6 +87,7 @@
  .toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}
  .search{grid-column:1/-1}
 }
+
 @media(max-width:760px){
  .toolbar{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-bottom:14px}
  .search{grid-column:1/-1;min-width:0}
@@ -187,3 +188,44 @@
 .folderIndex{background:white}
 .folderItem{grid-template-columns:minmax(0,1fr) auto}
 .folderActions{grid-column:auto}
+.headActions{align-items:center;gap:8px}
+.toolbar{background:#f5f8fa;border-block-end:1px solid var(--line);padding:14px;border-radius:8px;margin-bottom:16px}
+.search{min-width:0;gap:7px}.search input{border:0;background:transparent;outline:0}
+.filter,.sort{font-size:12px}.filter select,.sort select,.search input{font-size:13px}
+.locationBar{padding:8px 0;background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0}
+.folderIndex{padding:0;margin:18px 0 24px;border:0;background:transparent}
+.folderIndexHead,.registerHead{align-items:center;margin:0 0 12px}
+.folderItem{padding:12px 4px}.folderLink,.documentCell .link{font-size:14px}
+.folderMeta,.reviewCell small{font-size:11px}
+.manageButton,.reviewAction,.reviewReset{min-height:36px;font-size:12px;border-radius:6px}
+.attachmentGroup{padding:0;border:0}.attachmentGroup .registerHead{border-top:2px solid #e1bc29;padding-top:16px}
+@media(max-width:1100px){.toolbar{grid-template-columns:repeat(4,minmax(0,1fr))}.search{grid-column:1/-1}}
+@media(max-width:760px){
+ .toolbar{grid-template-columns:repeat(2,minmax(0,1fr));padding:10px}.search{flex-wrap:nowrap}
+ .headActions{flex-wrap:wrap}.headActions button{padding:8px 10px}
+ .tableWrap:has(.documentsTable){border:0;overflow:visible;background:transparent;box-shadow:none}
+ .tableWrap table.documentsTable{display:block;min-width:0;width:100%}
+ .documentsTable thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+ .documentsTable tbody{display:grid;gap:12px}
+ .documentsTable tbody tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:14px;background:white;border:1px solid var(--line);border-radius:8px}
+ .documentsTable tbody td{padding:0;border:0;min-width:0;width:auto}
+ .documentsTable td[data-label]::before{content:attr(data-label);display:block;font-size:11px;color:var(--muted);font-weight:500}
+ .documentsTable .documentCell{order:-1;grid-column:1/-1}
+ .documentsTable td:nth-child(5){grid-column:1/-1;grid-row:4}
+ .documentsTable tbody td:last-child{position:static;background:transparent;box-shadow:none;align-self:end;justify-self:end}
+}
+.toolbar{grid-template-columns:minmax(0,1fr) auto;align-items:center}
+.toolbar .search{grid-column:auto}
+.filterFields{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.filterFields[hidden]{display:none}
+@media(max-width:760px){
+ .filterFields{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .toolbar{gap:6px}.toolbar>button{padding-inline:8px;font-size:11px}
+ .documentsTable td:nth-child(6){grid-column:1;grid-row:5}
+ .documentsTable tbody td:last-child{grid-column:2;grid-row:5}
+}
+.extraActions{border-block-start:1px solid var(--line);margin-top:18px;padding-top:14px}
+.extraActions summary{font-weight:650;color:#365564}.extraActions[open] summary{margin-bottom:14px}
+.dialogHead{border-bottom:1px solid var(--line);padding-bottom:14px}
+.dialogForm label,.dialogForm input,.dialogForm select{font-size:14px}
+.reviewReset{margin-bottom:16px}
