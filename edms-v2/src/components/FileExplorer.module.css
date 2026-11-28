@@ -261,3 +261,12 @@
 @media(max-width:760px){
  .rowTools{justify-content:space-between}.rowTools button:only-child{margin-inline-start:auto}
 }
+
+.registerBody{min-width:0}
+.folderList{grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:10px;border:0}
+.folderList .folderItem{padding:6px;border:1px solid var(--line);border-left:3px solid #8ab9c6;border-radius:8px;background:#f8fbfc}
+@media(min-width:1550px){
+ .registerSplit{display:grid;grid-template-columns:minmax(220px,1fr) minmax(0,3.8fr);gap:24px;align-items:start}
+ .registerSplit .folderIndex{margin-top:0}
+ .registerSplit .folderList{grid-template-columns:1fr}
+}

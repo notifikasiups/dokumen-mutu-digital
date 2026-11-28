@@ -170,3 +170,14 @@
  .sidebar[data-expanded=true] .sidebarBottom>button{margin-left:auto}
 }
 .primary,.secondary,.danger{border-radius:var(--control-radius);min-height:var(--control-height);padding:7px var(--control-inline);font-size:13px;font-weight:var(--control-weight);line-height:1.3;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+
+.homeColumns{display:grid;grid-template-columns:minmax(240px,.8fr) minmax(0,1.6fr);gap:20px;align-items:start}
+.serviceLaunch{display:grid;justify-items:start;padding:clamp(20px,3vw,34px);background:#123e4d;color:white;border-radius:12px;border-top:4px solid #f4cf33}
+.serviceLaunch>svg{color:#abe0ea;margin-bottom:22px}
+.serviceLaunch h2{font-size:24px;line-height:1.25}.serviceLaunch p{margin:8px 0 24px;color:#d0e5e9;max-width:35ch}
+.launchAction,.mapShortcut{display:inline-flex;align-items:center;gap:10px;min-height:var(--control-height);font-weight:var(--control-weight)}
+.launchAction{border:0;border-radius:var(--control-radius);padding:8px 16px;background:white;color:#124554}
+.mapShortcut{width:100%;margin-top:24px;padding:14px 0 0;border:0;border-top:1px solid #50717b;background:transparent;color:white;text-align:left}
+.serviceLaunch button:focus-visible{outline:3px solid #f4cf33}
+.homeColumns .panel{margin:0}
+@media(max-width:1000px){.homeColumns{grid-template-columns:1fr}.serviceLaunch{padding:20px}.serviceLaunch>svg{display:none}.serviceLaunch p{max-width:none;margin-bottom:14px}.mapShortcut{margin-top:14px}}

@@ -1,3 +1,4 @@
+import {categoryRoots} from './register-category.mjs';
 import {reviewColumns,reviewFields} from './review-schedule.mjs';
 import {query,rows,withTransaction} from './db.mjs';
 import {id,fail,editable} from './core.mjs';
@@ -84,10 +85,18 @@ async function browse(folderId,user){
  children=children.filter(row=>canViewFolder(user,row));
  return {folder:mapFolder(folder,user),breadcrumb:await breadcrumb(folder.id),folders:children.map(row=>mapFolder(row,user)),documents:await listDocuments(folder.id,user)};
 }
-async function searchDocuments(value,user){
+async function searchDocuments(value,user,category){
  const term='%'+value.trim()+'%';
  const searchSql=activeDocs.replace(' FROM v2_documents d',',df.folder_id,f.category folder_category,f.relative_path folder_relative_path FROM v2_documents d');
  const args=[];let scope='';if(user.role==='Editor'){const aliases=departmentAliases(user.bidang);scope=' AND d.department IN ('+aliases.map(()=>'?').join(',')+')';args.push(...aliases);}
+ if(category){
+  if(category!=='Sertifikasi')return [];
+  const {explicit,legacy}=categoryRoots(await catalog(user),category);
+  const roots=explicit?[explicit]:legacy;
+  if(!roots.length)return [];
+  scope+=' AND f.is_deleted=0 AND f.category IN ('+roots.map(()=>'?').join(',')+')';
+  args.push(...roots.map(root=>root.name));
+ }
  args.push(term,term,term,term);
  const rowsFound=await query(searchSql+" LEFT JOIN v2_document_folders df ON df.document_id=d.id LEFT JOIN v2_folder_nodes f ON f.id=df.folder_id WHERE d.status='Aktif'"+scope+" AND (d.code LIKE ? OR d.title LIKE ? OR d.category LIKE ? OR f.name LIKE ?) ORDER BY d.title LIMIT 500",args);
  return rowsFound.map(row=>({...mapDocument(row,user),folderPath:row.folder_id?(row.folder_relative_path?row.folder_category+'/'+row.folder_relative_path:row.folder_category):''}));
@@ -123,7 +132,7 @@ export async function manageFolders(req,segments,user,json,response){
   if(url.searchParams.get('trash')==='1')return response({folders:await deletedFolders(user)});
   const attachmentsUnder=url.searchParams.get('attachmentsUnder');if(attachmentsUnder)return response({groups:await attachmentGroups(uuid(attachmentsUnder),user)});
   const search=url.searchParams.get('search')||'';
-  if(search.trim())return response({searchResults:await searchDocuments(search,user)});
+  if(search.trim())return response({searchResults:await searchDocuments(search,user,url.searchParams.get('category'))});
   return response(await browse(folderId?uuid(folderId):null,user));
  }
  if(method==='POST'){

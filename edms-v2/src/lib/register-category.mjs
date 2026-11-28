@@ -1,6 +1,8 @@
-type RootFolder = { parentId: string | null; name: string };
-
-export function categoryRoots<T extends RootFolder>(folders: T[], category: string) {
+/** @template {{parentId: string|null, name: string}} T
+ * @param {T[]} folders
+ * @param {string} category
+ */
+export function categoryRoots(folders, category) {
   const roots = folders.filter(folder => !folder.parentId);
   const explicit = roots.find(folder => folder.name.trim().localeCompare(category, 'id', { sensitivity: 'base' }) === 0);
   const legacy = category === 'Sertifikasi'
