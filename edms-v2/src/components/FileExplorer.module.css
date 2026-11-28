@@ -174,9 +174,9 @@
 @media(max-width:760px){.attachmentGroup{padding-inline-start:10px}.attachmentGroup .registerHead{align-items:flex-start;flex-wrap:wrap}.dateFormActions{justify-content:flex-start}}
 .tableWrap table.documentsTable{min-width:740px;table-layout:fixed}
 .documentsTable th{white-space:normal;line-height:1.4}
-.documentsTable th:nth-child(1){width:12%}.documentsTable th:nth-child(2){width:24%}
-.documentsTable th:nth-child(3){width:13%}.documentsTable th:nth-child(4){width:6%}
-.documentsTable th:nth-child(5){width:22%}.documentsTable th:nth-child(6){width:12%}
+
+
+
 .documentsTable td,.documentsTable th{padding:12px 8px}
 .documentsTable .reviewCell{min-width:0}
 .documentsTable td:last-child,.documentsTable th:last-child{position:sticky;right:0;background:#f8fbfc;box-shadow:-1px 0 #dce6eb}
@@ -211,7 +211,7 @@
  .documentsTable tbody td{padding:0;border:0;min-width:0;width:auto}
  .documentsTable td[data-label]::before{content:attr(data-label);display:block;font-size:11px;color:var(--muted);font-weight:500}
  .documentsTable .documentCell{order:-1;grid-column:1/-1}
- .documentsTable td:nth-child(5){grid-column:1/-1;grid-row:4}
+
  .documentsTable tbody td:last-child{position:static;background:transparent;box-shadow:none;align-self:end;justify-self:end}
 }
 .toolbar{grid-template-columns:minmax(0,1fr) auto;align-items:center}
@@ -221,7 +221,7 @@
 @media(max-width:760px){
  .filterFields{grid-template-columns:repeat(2,minmax(0,1fr))}
  .toolbar{gap:6px}.toolbar>button{padding-inline:8px;font-size:11px}
- .documentsTable td:nth-child(6){grid-column:1;grid-row:5}
+
  .documentsTable tbody td:last-child{grid-column:2;grid-row:5}
 }
 .extraActions{border-block-start:1px solid var(--line);margin-top:18px;padding-top:14px}
@@ -229,3 +229,35 @@
 .dialogHead{border-bottom:1px solid var(--line);padding-bottom:14px}
 .dialogForm label,.dialogForm input,.dialogForm select{font-size:14px}
 .reviewReset{margin-bottom:16px}
+.manageButton,.reviewReset,.toolbar button,.dialogForm button{border-radius:var(--control-radius);min-height:var(--control-height);padding:7px var(--control-inline);font-size:13px;font-weight:var(--control-weight);line-height:1.3;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.groupLink{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 14px;align-items:center;padding:8px;border:0;border-radius:var(--control-radius);background:transparent;color:var(--ink);text-align:left}
+.groupLink:hover{background:#edf6f8}.groupLink strong{font-size:14px;overflow-wrap:anywhere}.groupLink .folderMeta{grid-column:1;margin:0}
+.groupArrow{grid-column:2;grid-row:1/3;color:var(--brand);font-size:21px}
+.folderItem{padding:5px 0;align-items:center}.folderActions .manageButton,.rowTools button:last-child{min-width:40px;padding:0;font-size:20px;letter-spacing:1px}
+.rowTools{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.documentsTable td{vertical-align:middle}
+.documentsTable th:nth-child(1){width:25%}.documentsTable th:nth-child(2){width:14%}.documentsTable th:nth-child(3){width:6%}
+.documentsTable th:nth-child(4){width:19%}.documentsTable th:nth-child(5){width:13%}.documentsTable th:nth-child(6){width:23%}
+.documentsTable .documentCell small{font-size:11px;overflow-wrap:anywhere}
+@media(max-width:760px){
+ .documentsTable .statusColumn{grid-column:1/-1}
+ .documentsTable tbody td:last-child{grid-column:1/-1;grid-row:auto;justify-self:stretch;border-top:1px solid var(--line);padding-top:10px}
+ .rowTools{justify-content:flex-end}.folderActions{grid-column:2}
+}
+.markReview{
+ display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;
+ min-height:var(--control-height);padding:7px var(--control-inline);
+ border:1px solid #93bfcb;border-radius:var(--control-radius);
+ background:#eff8fa;color:#07566b;font-size:13px;font-weight:var(--control-weight);line-height:1.3
+}
+.markReview:hover:not(:disabled){background:#def1f5;border-color:#578da0}
+.reviewCell time{font-variant-numeric:tabular-nums}
+.documentsTable td.statusColumn{color:var(--muted)}
+.documentsTable .documentCell .link{font-size:14px;line-height:1.45}
+@media(min-width:761px){
+ .tableWrap table.documentsTable{min-width:850px}
+ .rowTools{justify-content:flex-end}.documentsTable th:last-child{text-align:right}
+}
+@media(max-width:760px){
+ .rowTools{justify-content:space-between}.rowTools button:only-child{margin-inline-start:auto}
+}
